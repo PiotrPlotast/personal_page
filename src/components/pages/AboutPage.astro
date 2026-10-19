@@ -1,0 +1,130 @@
+---
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import PageHeader from '~/components/PageHeader.astro';
+import type { Locale } from '~/i18n/config';
+import { useTranslations } from '~/i18n/ui';
+import { getExperience, getProfile } from '~/lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const profile = await getProfile(locale);
+const experience = await getExperience(locale);
+// Drop a PDF at public/cv.pdf and the download button appears.
+const hasCv = existsSync(join(process.cwd(), 'public', 'cv.pdf'));
+const tile = 'rounded-tile border border-line bg-tile p-6 sm:p-8';
+const heading = 'font-display text-2xl font-extrabold tracking-tight';
+const period = (start: string, end?: string) => `${start.slice(0, 4)} – ${end ? end.slice(0, 4) : t('about.present')}`;
+---
+
+<BaseLayout title={t('page.about')} description={profile.tagline} locale={locale}>
+  <PageHeader title={t('page.about')} intro={profile.tagline}>
+    {hasCv && (
+      <a
+        href="/cv.pdf"
+        download
+        class="mt-6 inline-flex min-h-12 items-center rounded-full bg-fg px-5.5 font-bold text-bg no-underline hover:opacity-85"
+      >
+        {t('about.cv')}
+      </a>
+    )}
+  </PageHeader>
+
+  <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
+    <div class="flex flex-col gap-4">
+      <section aria-labelledby="about-me" class={tile}>
+        <h2 id="about-me" class={heading}>
+          {t('about.lead')}
+        </h2>
+        <p class="mt-3 max-w-[65ch] text-lg">{profile.about}</p>
+      </section>
+
+      <section aria-labelledby="experience" class={tile}>
+        <h2 id="experience" class={heading}>
+          {t('about.experience')}
+        </h2>
+        {experience.length === 0 ? (
+          <p class="mt-3 text-muted">{t('about.experienceEmpty')}</p>
+        ) : (
+          <ol class="mt-5 flex flex-col gap-6 border-l border-line pl-6">
+            {experience.map(({ data, locale: entryLocale }) => (
+              <li class="relative" lang={entryLocale !== locale ? entryLocale : undefined}>
+                <span aria-hidden="true" class="absolute top-2 -left-[29px] size-2.5 rounded-full bg-accent" />
+                <p class="text-sm text-muted">
+                  {t(`experience.${data.type}`)} · {period(data.start, data.end)}
+                </p>
+                <h3 class="mt-0.5 font-display text-lg font-bold">
+                  {data.link ? (
+                    <a href={data.link} class="underline-offset-4 hover:underline">
+                      {data.title}
+                    </a>
+                  ) : (
+                    data.title
+                  )}
+                </h3>
+                <p class="font-medium">
+                  {data.organization}
+                  {data.location && <span class="text-muted"> · {data.location}</span>}
+                </p>
+                {data.description && <p class="mt-1 text-muted">{data.description}</p>}
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      {profile.now.length > 0 && (
+        <section aria-labelledby="now" class="rounded-tile bg-lime p-6 text-on-lime sm:p-8">
+          <h2 id="now" class={heading}>
+            {t('about.now')}
+          </h2>
+          <ul class="mt-3 flex list-disc flex-col gap-1.5 pl-5">
+            {profile.now.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section aria-labelledby="skills" class={tile}>
+        <h2 id="skills" class={heading}>
+          {t('about.skills')}
+        </h2>
+        <ul class="mt-4 flex flex-wrap gap-1.5">
+          {profile.skills.map((skill) => (
+            <li class="rounded-full bg-bg px-3 py-1 text-sm font-medium">{skill}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section aria-labelledby="elsewhere" class="rounded-tile border border-ink-border bg-ink p-6 text-ink-fg sm:p-8">
+        <h2 id="elsewhere" class={heading}>
+          {t('about.elsewhere')}
+        </h2>
+        <ul class="mt-4 flex flex-col gap-2">
+          {profile.email && (
+            <li>
+              <a href={`mailto:${profile.email}`} class="font-bold underline underline-offset-4">
+                {profile.email}
+              </a>
+            </li>
+          )}
+          {profile.socials.map((social) => (
+            <li>
+              <a href={social.href} class="font-bold underline underline-offset-4">
+                {social.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  </div>
+</BaseLayout>

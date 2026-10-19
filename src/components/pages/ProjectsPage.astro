@@ -1,0 +1,63 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import PageHeader from '~/components/PageHeader.astro';
+import { localizePath, type Locale } from '~/i18n/config';
+import { useTranslations } from '~/i18n/ui';
+import { getProjects } from '~/lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const projects = await getProjects(locale);
+---
+
+<BaseLayout title={t('page.projects')} description={t('projects.intro')} locale={locale}>
+  <PageHeader title={t('page.projects')} intro={t('projects.intro')} />
+  <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {projects.map(({ slug, data, locale: contentLocale }) => (
+      <li class:list={[data.featured && 'sm:col-span-2']}>
+        <article
+          lang={contentLocale !== locale ? contentLocale : undefined}
+          class:list={[
+            'group relative flex h-full flex-col gap-3 rounded-tile border p-6 transition-transform hover:-translate-y-0.5',
+            data.featured ? 'border-ink-border bg-ink text-ink-fg' : 'border-line bg-tile',
+          ]}
+        >
+          <p
+            class:list={[
+              'flex flex-wrap items-center gap-2 text-sm font-bold',
+              data.featured ? 'text-ink-muted' : 'text-muted',
+            ]}
+          >
+            {data.featured && <span class="rounded-full bg-lime px-2.5 py-0.5 text-on-lime">{t('home.featured')}</span>}
+            {data.kind}
+          </p>
+          <h2 class="font-display text-2xl leading-tight font-extrabold tracking-tight">
+            <a
+              href={localizePath(`/projects/${slug}/`, locale)}
+              class="no-underline after:absolute after:inset-0 after:rounded-tile group-hover:underline"
+            >
+              {data.name}
+            </a>
+          </h2>
+          <p class={data.featured ? 'text-ink-muted' : 'text-muted'}>{data.summary}</p>
+          <ul aria-label={t('projects.stack')} class="mt-auto flex flex-wrap gap-1.5 pt-2">
+            {data.stack.map((tech) => (
+              <li
+                class:list={[
+                  'rounded-full px-2.5 py-0.5 text-[13px] font-medium',
+                  data.featured ? 'bg-ink-raise' : 'bg-bg',
+                ]}
+              >
+                {tech}
+              </li>
+            ))}
+          </ul>
+        </article>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>

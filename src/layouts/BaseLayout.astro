@@ -14,9 +14,13 @@ interface Props {
   locale?: Locale;
   /** Emit hreflang alternates and the language switcher (off for pages that exist in one language only). */
   alternates?: boolean;
+  /** Marks the page as an article (blog post): og:type, dates and BlogPosting structured data. */
+  article?: { published: Date; updated?: Date | undefined; tags: string[] };
+  /** Social preview image, relative to the site root. */
+  image?: string;
 }
 
-const { title, alternates = true } = Astro.props;
+const { title, alternates = true, article, image = '/og/default.png' } = Astro.props;
 const locale = Astro.props.locale ?? localeFromPath(Astro.url.pathname);
 const t = useTranslations(locale);
 const profile = await getProfile(locale);
@@ -32,6 +36,34 @@ const altLinks = alternates
       { hreflang: 'x-default', href: new URL(localizePath(Astro.url.pathname, 'en'), Astro.site) },
     ]
   : [];
+const imageUrl = new URL(image, Astro.site);
+const person = {
+  '@type': 'Person',
+  name: profile.name,
+  alternateName: profile.nickname,
+  jobTitle: profile.role,
+  url: new URL('/', Astro.site).href,
+  sameAs: profile.socials.map((social) => social.href),
+};
+// Structured data: the person on the home pages, an article on blog posts.
+const isHome = Astro.url.pathname === localizePath('/', locale);
+const jsonLd = article
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: title,
+      description,
+      datePublished: article.published.toISOString(),
+      dateModified: (article.updated ?? article.published).toISOString(),
+      keywords: article.tags.join(', '),
+      inLanguage: localeTags[locale].lang,
+      url: canonical.href,
+      image: imageUrl.href,
+      author: person,
+    }
+  : isHome
+    ? { '@context': 'https://schema.org', ...person }
+    : undefined;
 ---
 
 <!doctype html>
@@ -49,11 +81,26 @@ const altLinks = alternates
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta name="theme-color" content="#eceef1" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#131417" media="(prefers-color-scheme: dark)" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content={localeTags[locale].og} />
+    <meta property="og:site_name" content={profile.name} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${profile.name} · ${profile.role}`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {article && <meta property="article:published_time" content={article.published.toISOString()} />}
+    {article?.updated && <meta property="article:modified_time" content={article.updated.toISOString()} />}
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${profile.name} · ${t('page.blog')}`}
+      href={localizePath('/rss.xml', locale)}
+    />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
     <meta name="generator" content={Astro.generator} />
     <Font cssVariable="--font-bricolage" preload />
     <Font cssVariable="--font-dm-sans" preload />

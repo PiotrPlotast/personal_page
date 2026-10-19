@@ -2,7 +2,15 @@
   "ci": {
     "collect": {
       "staticDistDir": "./.vercel/output/static",
-      "url": ["http://localhost/", "http://localhost/pl/", "http://localhost/projects/", "http://localhost/about/"],
+      "url": [
+        "http://localhost/",
+        "http://localhost/pl/",
+        "http://localhost/projects/",
+        "http://localhost/projects/accountability-buddies/",
+        "http://localhost/blog/",
+        "http://localhost/blog/how-i-built-this-site/",
+        "http://localhost/about/"
+      ],
       "numberOfRuns": 3,
       "settings": {
         "chromeFlags": "--no-sandbox"

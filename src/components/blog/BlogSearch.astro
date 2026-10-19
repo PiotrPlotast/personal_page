@@ -1,0 +1,109 @@
+---
+/**
+ * Full-text search over blog posts, powered by Pagefind (an index built after `astro build`).
+ * Hidden until the index loads, so it never shows a broken box in dev or without JavaScript.
+ */
+import { localeTags, type Locale } from '~/i18n/config';
+import { useTranslations } from '~/i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const strings = {
+  none: t('search.none'),
+  one: t('search.count.one'),
+  few: t('search.count.few'),
+  many: t('search.count.many'),
+  other: t('search.count.other'),
+};
+---
+
+<search
+  data-blog-search
+  data-lang={localeTags[locale].intl}
+  data-strings={JSON.stringify(strings)}
+  hidden
+  class="mb-8 block"
+>
+  <form class="flex flex-col gap-2" onsubmit="return false">
+    <label for="blog-search" class="font-bold">
+      {t('search.label')}
+    </label>
+    <input
+      id="blog-search"
+      type="search"
+      autocomplete="off"
+      placeholder={t('search.placeholder')}
+      class="min-h-12 w-full max-w-xl rounded-full border border-line-strong bg-tile px-5 text-fg placeholder:text-muted"
+    />
+  </form>
+  <p data-search-status role="status" class="mt-3 text-sm text-muted"></p>
+  <ul data-search-results class="mt-2 flex flex-col gap-3"></ul>
+</search>
+
+<script>
+  interface PagefindResult {
+    data: () => Promise<{ url: string; excerpt: string; meta: { title?: string } }>;
+  }
+  interface Pagefind {
+    search: (query: string) => Promise<{ results: PagefindResult[] }>;
+  }
+
+  const root = document.querySelector<HTMLElement>('[data-blog-search]');
+  const input = root?.querySelector<HTMLInputElement>('input');
+  const status = root?.querySelector<HTMLElement>('[data-search-status]');
+  const list = root?.querySelector<HTMLElement>('[data-search-results]');
+
+  if (root && input && status && list) {
+    const strings = JSON.parse(root.dataset['strings'] ?? '{}') as Record<string, string>;
+    const plural = new Intl.PluralRules(root.dataset['lang']);
+    const indexUrl = '/pagefind/pagefind.js';
+    let pagefind: Pagefind | undefined;
+    let timer: number | undefined;
+
+    const render = async (query: string) => {
+      list.replaceChildren();
+      if (!pagefind || !query.trim()) {
+        status.textContent = '';
+        return;
+      }
+      const { results } = await pagefind.search(query);
+      if (input.value !== query) return; // a newer query is already running
+      const top = await Promise.all(results.slice(0, 8).map((r) => r.data()));
+      const n = String(results.length);
+      status.textContent = results.length
+        ? (strings[plural.select(results.length)] ?? strings['other'] ?? '').replace('{n}', n)
+        : (strings['none'] ?? '').replace('{query}', query);
+      for (const result of top) {
+        const item = document.createElement('li');
+        item.className = 'rounded-2xl border border-line bg-tile p-4';
+        const link = document.createElement('a');
+        link.href = result.url;
+        link.className = 'font-display text-lg font-bold underline-offset-4 hover:underline';
+        link.textContent = result.meta.title ?? result.url;
+        const excerpt = document.createElement('p');
+        excerpt.className = 'mt-1 text-sm text-muted [&_mark]:bg-lime [&_mark]:text-on-lime';
+        excerpt.innerHTML = result.excerpt; // Pagefind escapes page text and only adds <mark>.
+        item.append(link, excerpt);
+        list.append(item);
+      }
+    };
+
+    import(/* @vite-ignore */ indexUrl)
+      .then((module: Pagefind) => {
+        pagefind = module;
+        root.hidden = false;
+      })
+      .catch(() => {
+        // No index (dev server or failed load): keep search hidden.
+      });
+
+    input.addEventListener('input', () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => void render(input.value), 200);
+    });
+  }
+</script>

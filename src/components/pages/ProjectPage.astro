@@ -1,0 +1,120 @@
+---
+import { Image } from 'astro:assets';
+import { render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import FallbackNotice from '~/components/FallbackNotice.astro';
+import { localizePath, type Locale } from '~/i18n/config';
+import { useTranslations } from '~/i18n/ui';
+import type { LocalizedMeta } from '~/lib/localized';
+
+type Project = CollectionEntry<'projects'> & LocalizedMeta;
+
+interface Props {
+  locale: Locale;
+  project: Project;
+  prev?: Project | undefined;
+  next?: Project | undefined;
+}
+
+const { locale, project, prev, next } = Astro.props;
+const t = useTranslations(locale);
+const { data } = project;
+const { Content } = await render(project);
+// Bodies that are only a sentence (plus TODO comments) don't count as a written case study yet.
+const writtenUp = (project.body ?? '').replace(/<!--[\s\S]*?-->/g, '').trim().length > 400;
+const contentLang = project.locale !== locale ? project.locale : undefined;
+const pill =
+  'inline-flex min-h-12 items-center gap-2 rounded-full px-5.5 font-bold no-underline transition-opacity hover:opacity-85';
+---
+
+<BaseLayout title={data.name} description={data.summary} locale={locale}>
+  <nav aria-label="Breadcrumb" class="pt-2 pb-6">
+    <a href={localizePath('/projects/', locale)} class="font-bold text-accent underline-offset-4 hover:underline">
+      {t('projects.all')}
+    </a>
+  </nav>
+
+  {project.isFallback && <FallbackNotice locale={locale} />}
+
+  <article lang={contentLang}>
+    <header class="rounded-tile border border-ink-border bg-ink p-[clamp(24px,4vw,48px)] text-ink-fg">
+      <p class="text-sm font-bold tracking-[0.06em] text-ink-muted uppercase">{data.kind}</p>
+      <h1 class="mt-3 font-display text-[clamp(38px,6vw,64px)] leading-none font-extrabold tracking-[-0.04em]">
+        {data.name}
+      </h1>
+      <p class="mt-4 max-w-2xl text-lg text-ink-muted sm:text-xl">{data.summary}</p>
+      <dl class="mt-6 flex flex-wrap gap-x-10 gap-y-4">
+        <div>
+          <dt class="text-sm text-ink-muted">{t('projects.status')}</dt>
+          <dd class="font-bold">{t(`projects.status.${data.status}`)}</dd>
+        </div>
+        <div>
+          <dt class="text-sm text-ink-muted">{t('projects.stack')}</dt>
+          <dd>
+            <ul class="mt-1 flex flex-wrap gap-1.5">
+              {data.stack.map((tech) => (
+                <li class="rounded-full bg-ink-raise px-2.5 py-0.5 text-sm font-medium">{tech}</li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+      </dl>
+      <div class="mt-8 flex flex-wrap gap-2.5">
+        <a href={data.repo} class:list={[pill, 'bg-lime text-on-lime']}>
+          {t('projects.viewCode')}
+        </a>
+        {data.demo && (
+          <a href={data.demo} class:list={[pill, 'border border-ink-line']}>
+            {t('projects.liveDemo')}
+          </a>
+        )}
+      </div>
+    </header>
+
+    {data.screenshots.length > 0 && (
+      <section aria-label={t('projects.screenshots')} class="mt-8 grid gap-4 sm:grid-cols-2">
+        {data.screenshots.map((shot) => (
+          <Image
+            src={shot.src}
+            alt={shot.alt}
+            class="w-full rounded-tile border border-line"
+            widths={[640, 1280]}
+            sizes="(min-width: 640px) 50vw, 100vw"
+          />
+        ))}
+      </section>
+    )}
+
+    <div class="mt-10 rounded-tile border border-line bg-tile p-[clamp(24px,4vw,48px)]">
+      <div class="prose">
+        <Content />
+      </div>
+      {!writtenUp && <p class="mt-6 text-muted">{t('projects.writeupSoon')}</p>}
+    </div>
+  </article>
+
+  {(prev || next) && (
+    <nav aria-label={t('page.projects')} class="mt-8 grid gap-4 sm:grid-cols-2">
+      {prev ? (
+        <a
+          href={localizePath(`/projects/${prev.slug}/`, locale)}
+          class="rounded-tile border border-line bg-tile p-6 no-underline hover:border-line-strong"
+        >
+          <span class="block text-sm text-muted">← {t('projects.prev')}</span>
+          <span class="font-display text-xl font-bold">{prev.data.name}</span>
+        </a>
+      ) : (
+        <span />
+      )}
+      {next && (
+        <a
+          href={localizePath(`/projects/${next.slug}/`, locale)}
+          class="rounded-tile border border-line bg-tile p-6 text-right no-underline hover:border-line-strong"
+        >
+          <span class="block text-sm text-muted">{t('projects.next')} →</span>
+          <span class="font-display text-xl font-bold">{next.data.name}</span>
+        </a>
+      )}
+    </nav>
+  )}
+</BaseLayout>

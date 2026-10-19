@@ -1,0 +1,56 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import PageHeader from '~/components/PageHeader.astro';
+import BlogSearch from '~/components/blog/BlogSearch.astro';
+import PostList from '~/components/blog/PostList.astro';
+import { localizePath, type Locale } from '~/i18n/config';
+import { useTranslations } from '~/i18n/ui';
+import { collectTags, getPosts } from '~/lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const posts = await getPosts(locale);
+const tags = collectTags(posts);
+---
+
+<BaseLayout title={t('page.blog')} description={t('blog.intro')} locale={locale}>
+  <PageHeader title={t('page.blog')} intro={t('blog.intro')}>
+    <p class="mt-4">
+      <a href={localizePath('/rss.xml', locale)} class="font-bold text-accent underline underline-offset-4">
+        {t('blog.rss')}
+      </a>
+    </p>
+  </PageHeader>
+
+  {posts.length === 0 ? (
+    <p class="rounded-tile border border-line bg-tile p-6 text-muted">{t('blog.empty')}</p>
+  ) : (
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_16rem]">
+      <div>
+        <BlogSearch locale={locale} />
+        <PostList locale={locale} posts={posts} />
+      </div>
+      <aside aria-labelledby="tags-title">
+        <h2 id="tags-title" class="text-sm font-bold tracking-[0.06em] text-muted uppercase">
+          {t('blog.tags')}
+        </h2>
+        <ul class="mt-3 flex flex-wrap gap-1.5">
+          {tags.map((tag) => (
+            <li>
+              <a
+                href={localizePath(`/blog/tags/${tag.slug}/`, locale)}
+                class="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-line bg-tile px-3 text-sm font-medium no-underline hover:border-line-strong"
+              >
+                #{tag.name} <span class="text-muted">{tag.count}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    </div>
+  )}
+</BaseLayout>
