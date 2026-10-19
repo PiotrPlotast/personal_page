@@ -5,10 +5,10 @@ export const defaultLocale: Locale = 'en';
 /** Language names shown in the switcher, always in their own language. */
 export const localeNames: Record<Locale, string> = { en: 'English', pl: 'Polski' };
 
-/** BCP 47 tags for <html lang>, hreflang and og:locale. */
-export const localeTags: Record<Locale, { lang: string; og: string }> = {
-  en: { lang: 'en', og: 'en_GB' },
-  pl: { lang: 'pl', og: 'pl_PL' },
+/** BCP 47 tags for <html lang> and hreflang, og:locale, and the Intl locale for dates/numbers. */
+export const localeTags: Record<Locale, { lang: string; og: string; intl: string }> = {
+  en: { lang: 'en', og: 'en_GB', intl: 'en-GB' },
+  pl: { lang: 'pl', og: 'pl_PL', intl: 'pl-PL' },
 };
 
 export function isLocale(value: unknown): value is Locale {

@@ -1,7 +1,23 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
-const pages = ['/', '/projects', '/blog', '/about', '/contact', '/404', '/pl/', '/pl/projects', '/pl/about'];
+const pages = [
+  '/',
+  '/projects',
+  '/projects/accountability-buddies',
+  '/blog',
+  '/blog/how-i-built-this-site',
+  '/blog/tags/astro',
+  '/about',
+  '/contact',
+  '/404',
+  '/pl/',
+  '/pl/projects',
+  '/pl/projects/simsify-life',
+  '/pl/blog',
+  '/pl/blog/how-i-built-this-site',
+  '/pl/about',
+];
 
 test.describe('accessibility (axe, WCAG 2.2 AA)', () => {
   for (const theme of ['light', 'dark'] as const) {
@@ -250,5 +266,129 @@ test.describe('English and Polish', () => {
     const log = page.getByRole('log', { name: "Rozmowa z Byte'em" });
     await expect(log.getByText(/Wciąż się uczę, więc/)).toBeVisible();
     await expect(page.getByRole('button', { name: 'Zamknij pełny czat' })).toBeVisible();
+  });
+});
+
+test.describe('projects', () => {
+  test('the index links to a case study with code and navigation', async ({ page }) => {
+    await page.goto('/projects');
+    await expect(page.getByRole('heading', { level: 1, name: 'Projects' })).toBeVisible();
+    await expect(page.locator('main article')).toHaveCount(5);
+
+    await page.getByRole('link', { name: 'Simsify Life' }).click();
+    await expect(page).toHaveURL(/\/projects\/simsify-life\/?$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Simsify Life' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'View code' })).toHaveAttribute(
+      'href',
+      /github\.com\/PiotrPlotast\/simsify-life/,
+    );
+    // Still inside the Projects section.
+    await expect(
+      page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Projects' }),
+    ).toHaveAttribute('aria-current', 'page');
+    await page.getByRole('link', { name: /Previous project/ }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Accountability Buddies' })).toBeVisible();
+  });
+
+  test('case studies are translated', async ({ page }) => {
+    await page.goto('/pl/projects/dictionary-web-app');
+    await expect(page.getByRole('heading', { level: 1, name: 'Słownik' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Zobacz kod' })).toBeVisible();
+  });
+});
+
+test.describe('blog', () => {
+  test('a post shows its date, reading time, table of contents and tags', async ({ page }) => {
+    await page.goto('/blog');
+    await page.getByRole('link', { name: 'How I built this site' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'How I built this site' })).toBeVisible();
+    await expect(page.locator('time').first()).toHaveAttribute('datetime', '2026-10-19');
+    await expect(page.getByText(/\d+ min read/)).toBeVisible();
+
+    const toc = page.getByRole('navigation', { name: 'On this page' });
+    await toc.getByRole('link', { name: 'A bug only CI could see' }).click();
+    await expect(page).toHaveURL(/#a-bug-only-ci-could-see$/);
+
+    await page.getByRole('link', { name: '#Astro' }).first().click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Posts tagged “Astro”' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'How I built this site' })).toBeVisible();
+  });
+
+  test('code blocks have a working copy button', async ({ page, context, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Clipboard permissions are Chromium-only');
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    await page.goto('/blog/how-i-built-this-site');
+    const copy = page.getByRole('button', { name: 'Copy code' }).first();
+    await copy.click();
+    await expect(page.getByRole('button', { name: 'Copied' })).toBeVisible();
+    const copied = await page.evaluate(() => navigator.clipboard.readText());
+    expect(copied).toContain('export function insetClip');
+  });
+
+  test('search finds posts', async ({ page }) => {
+    await page.goto('/blog');
+    const search = page.getByRole('searchbox', { name: 'Search posts' });
+    await expect(search).toBeVisible();
+    await search.fill('clip-path');
+    await expect(page.getByRole('status')).toHaveText(/1 result/);
+    await expect(
+      page.locator('[data-search-results]').getByRole('link', { name: 'How I built this site' }),
+    ).toBeVisible();
+
+    await search.fill('kubernetes');
+    await expect(page.getByRole('status')).toHaveText('No posts match “kubernetes”.');
+  });
+
+  test('untranslated posts fall back to English with a note', async ({ page }) => {
+    await page.goto('/pl/blog/how-i-built-this-site');
+    await expect(page.getByRole('note')).toContainText('nie jest jeszcze dostępna po polsku');
+    await expect(page.locator('article[lang="en"]')).toBeVisible();
+    await expect(page.getByRole('link', { name: '← Wszystkie wpisy' })).toBeVisible();
+  });
+
+  test('RSS feeds list posts in each language', async ({ request }) => {
+    const en = await request.get('/rss.xml');
+    expect(en.ok()).toBe(true);
+    const enXml = await en.text();
+    expect(enXml).toContain('<title>How I built this site</title>');
+    expect(enXml).toContain('<language>en-GB</language>');
+
+    const pl = await (await request.get('/pl/rss.xml')).text();
+    expect(pl).toContain('<language>pl-PL</language>');
+    expect(pl).toContain('/pl/blog/how-i-built-this-site/');
+  });
+});
+
+test.describe('about', () => {
+  test('shows the bio, now, skills and links', async ({ page }) => {
+    await page.goto('/about');
+    for (const name of ['Who I am', 'Experience & education', 'Now', 'Skills', 'Elsewhere']) {
+      await expect(page.getByRole('heading', { level: 2, name })).toBeVisible();
+    }
+    await expect(page.getByRole('region', { name: 'Elsewhere' }).getByRole('link', { name: 'GitHub' })).toHaveAttribute(
+      'href',
+      'https://github.com/PiotrPlotast',
+    );
+    // No CV uploaded yet, so no download button.
+    await expect(page.getByRole('link', { name: /Download CV/ })).toHaveCount(0);
+  });
+});
+
+test.describe('SEO metadata', () => {
+  test('posts have article metadata and BlogPosting structured data', async ({ page }) => {
+    await page.goto('/blog/how-i-built-this-site');
+    await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'article');
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /\/og\/default\.png$/);
+    const data = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent()) ?? '{}');
+    expect(data['@type']).toBe('BlogPosting');
+    expect(data.headline).toBe('How I built this site');
+    expect(data.author.name).toBe('Piotr Płotast');
+  });
+
+  test('the home page describes the person', async ({ page }) => {
+    await page.goto('/');
+    const data = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent()) ?? '{}');
+    expect(data['@type']).toBe('Person');
+    expect(data.sameAs).toContain('https://github.com/PiotrPlotast');
   });
 });

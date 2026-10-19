@@ -1,0 +1,17 @@
+---
+import type { GetStaticPaths } from 'astro';
+import ProjectPage from '~/components/pages/ProjectPage.astro';
+import { getProjects } from '~/lib/content';
+
+export const getStaticPaths = (async () => {
+  const projects = await getProjects('pl');
+  return projects.map((project, i) => ({
+    params: { slug: project.slug },
+    props: { project, prev: projects[i - 1], next: projects[i + 1] },
+  }));
+}) satisfies GetStaticPaths;
+
+const { project, prev, next } = Astro.props;
+---
+
+<ProjectPage locale="pl" project={project} prev={prev} next={next} />

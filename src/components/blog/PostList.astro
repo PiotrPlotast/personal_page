@@ -1,0 +1,55 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { localizePath, type Locale } from '~/i18n/config';
+import { useTranslations } from '~/i18n/ui';
+import { formatDate, isoDate, readingMinutes, slugify } from '~/lib/format';
+import type { LocalizedMeta } from '~/lib/localized';
+
+interface Props {
+  locale: Locale;
+  posts: (CollectionEntry<'posts'> & LocalizedMeta)[];
+}
+
+const { locale, posts } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<ul class="flex flex-col gap-4">
+  {posts.map((post) => (
+    <li>
+      <article
+        lang={post.locale !== locale ? post.locale : undefined}
+        class="group relative rounded-tile border border-line bg-tile p-6 transition-colors hover:border-line-strong"
+      >
+        <p class="flex flex-wrap gap-x-3 text-sm text-muted">
+          <time datetime={isoDate(post.data.published)}>{formatDate(post.data.published, locale)}</time>
+          <span aria-hidden="true">·</span>
+          <span>{t('blog.minRead', { n: String(readingMinutes(post.body ?? '')) })}</span>
+        </p>
+        <h2 class="mt-2 font-display text-2xl leading-tight font-extrabold tracking-tight">
+          <a
+            href={localizePath(`/blog/${post.slug}/`, locale)}
+            class="no-underline after:absolute after:inset-0 after:rounded-tile group-hover:underline"
+          >
+            {post.data.title}
+          </a>
+        </h2>
+        <p class="mt-2 text-muted">{post.data.description}</p>
+        {post.data.tags.length > 0 && (
+          <ul aria-label={t('blog.tags')} class="relative z-10 mt-4 flex flex-wrap gap-1.5">
+            {post.data.tags.map((tag) => (
+              <li>
+                <a
+                  href={localizePath(`/blog/tags/${slugify(tag)}/`, locale)}
+                  class="inline-flex min-h-8 items-center rounded-full bg-bg px-3 text-[13px] font-medium no-underline hover:underline"
+                >
+                  #{tag}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </article>
+    </li>
+  ))}
+</ul>

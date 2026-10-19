@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
+import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 import tailwindcss from '@tailwindcss/vite';
@@ -28,7 +29,16 @@ export default defineConfig({
     defaultLocale: 'en',
     routing: { prefixDefaultLocale: false },
   },
+  markdown: {
+    // Dual themes: colours switch with the site theme via CSS (see .astro-code in global.css).
+    // High-contrast variants keep every token at WCAG AA against the code background.
+    shikiConfig: {
+      themes: { light: 'github-light-high-contrast', dark: 'github-dark-high-contrast' },
+      defaultColor: false,
+    },
+  },
   integrations: [
+    mdx(),
     sitemap({
       i18n: { defaultLocale: 'en', locales: { en: 'en', pl: 'pl' } },
       filter: (page) => !page.endsWith('/404/'),

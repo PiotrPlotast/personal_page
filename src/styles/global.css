@@ -96,6 +96,98 @@
   }
 }
 
+/* Long-form text (case studies, blog posts). Links are always underlined so they don't rely on colour. */
+@layer components {
+  .prose {
+    max-width: 70ch;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+  .prose > * + * {
+    margin-top: 1.25em;
+  }
+  .prose :where(h2, h3, h4) {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    scroll-margin-top: 1.5rem;
+  }
+  .prose h2 {
+    margin-top: 1.75em;
+    font-size: 1.75rem;
+  }
+  .prose h3 {
+    margin-top: 1.75em;
+    font-size: 1.3rem;
+  }
+  .prose :where(h2, h3) + * {
+    margin-top: 0.75em;
+  }
+  .prose a {
+    color: var(--c-accent);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .prose :where(ul, ol) {
+    padding-left: 1.4em;
+  }
+  .prose ul {
+    list-style: disc;
+  }
+  .prose ol {
+    list-style: decimal;
+  }
+  .prose li + li {
+    margin-top: 0.4em;
+  }
+  .prose li::marker {
+    color: var(--c-muted);
+  }
+  .prose blockquote {
+    border-left: 3px solid var(--c-line-strong);
+    padding-left: 1em;
+    color: var(--c-muted);
+  }
+  .prose :where(code, pre) {
+    font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  }
+  .prose :not(pre) > code {
+    border-radius: 0.375rem;
+    background: var(--c-bg);
+    padding: 0.1em 0.35em;
+    font-size: 0.9em;
+  }
+  .prose pre {
+    overflow-x: auto;
+    border: 1px solid var(--c-line);
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+  .prose img {
+    border-radius: 1rem;
+  }
+  .prose hr {
+    border-color: var(--c-line);
+    margin: 2.5em 0;
+  }
+}
+
+/* Shiki renders both themes into CSS variables; pick the one matching the site theme. */
+.astro-code,
+.astro-code span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+[data-theme='dark'] .astro-code,
+[data-theme='dark'] .astro-code span {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}
+
 /* Home: the chat tile can expand to cover the whole bento (see ChatPreview.astro). */
 [data-bento][data-chat-expanded] > :not([data-chat]) {
   display: none;

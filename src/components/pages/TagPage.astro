@@ -1,0 +1,29 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import PageHeader from '~/components/PageHeader.astro';
+import PostList from '~/components/blog/PostList.astro';
+import { localizePath, type Locale } from '~/i18n/config';
+import { useTranslations } from '~/i18n/ui';
+import type { LocalizedMeta } from '~/lib/localized';
+
+interface Props {
+  locale: Locale;
+  tag: string;
+  posts: (CollectionEntry<'posts'> & LocalizedMeta)[];
+}
+
+const { locale, tag, posts } = Astro.props;
+const t = useTranslations(locale);
+const title = t('blog.tagged', { tag });
+---
+
+<BaseLayout title={title} locale={locale}>
+  <nav aria-label="Breadcrumb" class="pt-2">
+    <a href={localizePath('/blog/', locale)} class="font-bold text-accent underline-offset-4 hover:underline">
+      {t('blog.allPosts')}
+    </a>
+  </nav>
+  <PageHeader title={title} />
+  <PostList locale={locale} posts={posts} />
+</BaseLayout>

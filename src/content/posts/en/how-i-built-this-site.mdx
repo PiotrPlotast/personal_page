@@ -1,0 +1,80 @@
+---
+title: How I built this site
+description: Five mockups, a bento that fits one screen, a chat that takes over the page, and a bug only CI could see.
+published: 2026-10-19
+tags: [Astro, Accessibility, Design, Animation]
+---
+
+I wanted a portfolio that does three things: shows recruiters what I've built, gives me a place to write about what I'm
+learning, and lets visitors ask an AI about me instead of hunting through pages. I built it together with Claude Code,
+an AI coding assistant, and this post is the story of the decisions along the way.
+
+## Five mockups, one bento
+
+Before writing any code I asked for five very different home page mockups: a minimal one, a terminal-style one, a
+bento grid, a warm "Claude-like" one and a neon one. Seeing them side by side made the choice easy in a way that
+describing them never would have. The neon version had too many colours and too many fonts. The terminal version was
+fun but felt like a costume.
+
+I ended up with the bento grid's look (Bricolage Grotesque headings, DM Sans for text and a single lime accent) on the
+layout of the warm version. Two fonts and one accent colour turned out to be the rule that made everything else easier.
+
+## A bento should fit one screen
+
+A bento grid that scrolls is just a list of cards. So on desktop the whole home page fits in one viewport: the intro
+and the chat share the top rows, and four compact tiles sit underneath.
+
+The tricky part is not clipping anything. Each grid row is `minmax(auto, 1fr)`, so it can grow to fill the screen but
+never shrinks below its content. On a short laptop screen or with zoomed-in text, the page simply scrolls instead of
+cutting text off. A Playwright test checks that the page doesn't scroll at five common desktop sizes, in English and
+in Polish.
+
+## A chat that takes over the page
+
+Click the chat input and the chat grows to cover the whole bento. My first attempt used the View Transitions API, but
+it stretches a snapshot of the element while it animates, so the text looked squashed.
+
+The version that shipped lays the chat out at its full size straight away and reveals it with an expanding
+`clip-path`, starting from the box it used to occupy:
+
+```ts
+export function insetClip(inner: Box, outer: Box, radius: number): string {
+  const px = (n: number) => `${Math.max(0, Math.round(n))}px`;
+  return `inset(${px(inner.top - outer.top)} ${px(outer.right - inner.right)} ${px(outer.bottom - inner.bottom)} ${px(
+    inner.left - outer.left,
+  )} round ${px(radius)})`;
+}
+```
+
+Nothing gets stretched, because nothing is being scaled, only uncovered.
+
+## A bug only CI could see
+
+All my tests passed locally, then the mobile run in CI failed every single time: close the chat, open it again, and
+it stayed closed. The cause was a cleanup step. After the closing animation, the code cancelled _every_ animation on
+the other tiles, including the new one that had just started when I re-opened the chat. A cancelled animation rejects
+its `finished` promise, so the opening code threw and gave up.
+
+The fix was to only ever cancel the animations a step started itself, and to treat a cancelled animation as finished:
+
+```ts
+const done = (animations: Animation[]) => Promise.all(animations.map((a) => a.finished.catch(() => undefined)));
+```
+
+I could only reproduce it locally after slowing the CPU down to match the CI machines. Now there's a test that opens
+and closes the chat three times in a row and fails on any page error.
+
+## Accessibility as a test, not a checklist
+
+Every page is scanned with axe in light and dark mode, in both languages, on desktop and mobile. Lighthouse runs in CI
+and fails the build if accessibility drops below 100. A few decisions came straight out of those checks:
+
+- the lime accent is only ever a background behind dark text, because lime text on white fails contrast
+- tabbing onto the chat input doesn't expand it; only clicking or typing does, so keyboard focus never rearranges the
+  page
+- while the chat covers everything, a screen-reader-only heading keeps the page's main heading in place
+
+## What's next
+
+The chat is still in training. Next up is teaching it about me for real, with the Claude API, a couple of tools to look
+up projects and posts, and rate limiting so nobody can run up my bill.
