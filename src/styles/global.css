@@ -1,0 +1,112 @@
+@import 'tailwindcss';
+
+/* Theme is driven by `data-theme` on <html>, set before first paint by BaseLayout. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/*
+ * Design tokens. Every text/background pair used on the site meets WCAG AA (≥ 4.5:1)
+ * in both themes. Lime is only ever a fill behind --c-on-lime text, never text on white;
+ * use --c-accent for lime-ish text and links.
+ */
+:root {
+  color-scheme: light;
+  --c-bg: #eceef1;
+  --c-tile: #ffffff;
+  --c-fg: #16171a;
+  --c-muted: #555a63;
+  --c-line: #dcdfe4;
+  --c-line-strong: #8b919b;
+  --c-lime: #d9f99d;
+  --c-on-lime: #1a2e05;
+  --c-accent: #3f6212;
+  /* "Ink" tiles (chat, contact) stay dark in both themes. */
+  --c-ink: #16171a;
+  --c-ink-fg: #f4f4f5;
+  --c-ink-border: #16171a;
+  --c-ink-raise: #26282d;
+  --c-ink-line: #5d626b;
+  --c-ink-muted: #b4b8bf;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --c-bg: #131417;
+  --c-tile: #1c1d21;
+  --c-fg: #f2f2f3;
+  --c-muted: #a4a6ad;
+  --c-line: #2c2d33;
+  --c-line-strong: #6a6c74;
+  --c-lime: #c7f27a;
+  --c-on-lime: #1a2e05;
+  --c-accent: #c7f27a;
+  --c-ink: #0b0b0d;
+  --c-ink-fg: #f2f2f3;
+  --c-ink-border: #2c2d33;
+  --c-ink-raise: #1f2024;
+  --c-ink-line: #4a4c53;
+  --c-ink-muted: #a4a6ad;
+}
+
+@theme inline {
+  --font-display: var(--font-bricolage);
+  --font-sans: var(--font-dm-sans);
+
+  --color-bg: var(--c-bg);
+  --color-tile: var(--c-tile);
+  --color-fg: var(--c-fg);
+  --color-muted: var(--c-muted);
+  --color-line: var(--c-line);
+  --color-line-strong: var(--c-line-strong);
+  --color-lime: var(--c-lime);
+  --color-on-lime: var(--c-on-lime);
+  --color-accent: var(--c-accent);
+  --color-ink: var(--c-ink);
+  --color-ink-fg: var(--c-ink-fg);
+  --color-ink-border: var(--c-ink-border);
+  --color-ink-raise: var(--c-ink-raise);
+  --color-ink-line: var(--c-ink-line);
+  --color-ink-muted: var(--c-ink-muted);
+
+  --radius-tile: 1.75rem;
+}
+
+@layer base {
+  html {
+    background-color: var(--c-bg);
+    color: var(--c-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+    border-radius: 0.5rem;
+  }
+
+  ::selection {
+    background-color: var(--c-lime);
+    color: var(--c-on-lime);
+  }
+}
+
+/* Smooth cross-page transitions without any JavaScript (supported browsers only). */
+@view-transition {
+  navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

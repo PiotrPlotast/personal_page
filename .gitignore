@@ -1,0 +1,22 @@
+# build output
+dist/
+.vercel/
+.astro/
+
+# dependencies
+node_modules/
+
+# test & audit output
+playwright-report/
+test-results/
+.lighthouseci/
+coverage/
+
+# env
+.env
+.env.*
+!.env.example
+
+# logs & OS
+*.log
+.DS_Store

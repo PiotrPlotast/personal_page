@@ -1,0 +1,20 @@
+---
+interface Props {
+  title: string;
+  phase: string;
+}
+
+const { title, phase } = Astro.props;
+---
+
+<section class="mx-auto max-w-2xl rounded-tile border border-line bg-tile p-[clamp(24px,5vw,48px)]">
+  <p class="text-sm font-bold tracking-[0.06em] text-muted uppercase">Under construction</p>
+  <h1 class="mt-3 font-display text-[clamp(36px,5vw,56px)] leading-none font-extrabold tracking-[-0.04em]">{title}</h1>
+  <p class="mt-4 text-lg text-muted">This page is being built ({phase}). Check back soon.</p>
+  <a
+    href="/"
+    class="mt-8 inline-flex min-h-12 items-center rounded-full bg-fg px-5.5 font-bold text-bg no-underline hover:opacity-85"
+  >
+    ← Back home
+  </a>
+</section>

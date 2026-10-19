@@ -1,0 +1,17 @@
+---
+import { profile } from '~/data/profile';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="mx-auto flex max-w-310 flex-wrap justify-between gap-3 px-6 pb-8 text-sm text-muted">
+  <p>
+    © {year} {profile.name}
+  </p>
+  <p>
+    Built with Astro ·{' '}
+    <a href={profile.source} class="underline underline-offset-2 hover:text-fg">
+      Source on GitHub
+    </a>
+  </p>
+</footer>
