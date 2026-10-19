@@ -41,7 +41,7 @@ export const profile = {
 export const agent = {
   name: 'Byte',
   tagline: 'My AI sidekick. Knows my CV better than I do.',
-  greeting: "Psst. I'm Byte. Soon you can ask me anything about Piotr. I'll spill everything that's on his CV.",
+  greeting: "Psst. I'm Byte, Piotr's AI sidekick. I'm still in training, but go on, ask me something.",
   suggestions: ['What has he built?', 'Open to internships?', "What's his stack?"],
 } as const;
 

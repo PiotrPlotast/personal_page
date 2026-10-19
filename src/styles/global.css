@@ -96,6 +96,16 @@
   }
 }
 
+/* Home: the chat tile can expand to cover the whole bento (see ChatPreview.astro). */
+[data-bento][data-chat-expanded] > :not([data-chat]) {
+  display: none;
+}
+
+[data-bento][data-chat-expanded] > [data-chat] {
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+}
+
 /* Smooth cross-page transitions without any JavaScript (supported browsers only). */
 @view-transition {
   navigation: auto;

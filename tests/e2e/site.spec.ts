@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 const pages = ['/', '/projects', '/blog', '/about', '/contact', '/404'];
 
@@ -24,9 +24,10 @@ test.describe('home page', () => {
   test('renders the hero, chat preview and navigation', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveTitle(/Piotr Płotast/);
-    await expect(page.getByRole('heading', { level: 1, name: "Hi, I'm Piotr." })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /Piotr Płotast/ })).toBeAttached();
+    await expect(page.getByRole('heading', { name: "Hi, I'm Piotr." })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Ask Byte' })).toBeVisible();
-    await expect(page.getByRole('textbox', { name: /Ask Byte a question/ })).toBeDisabled();
+    await expect(page.getByRole('textbox', { name: /Ask Byte a question/ })).toBeEditable();
 
     await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Projects' }).click();
     await expect(page).toHaveURL(/\/projects\/?$/);
@@ -70,6 +71,84 @@ test.describe('home bento fits one screen on desktop', () => {
         .locator('main section')
         .evaluateAll((tiles) => tiles.filter((tile) => tile.scrollHeight > tile.clientHeight + 1).length);
       expect(clipped).toBe(0);
+    });
+  }
+});
+
+test.describe('chat expands over the bento', () => {
+  const hero = (page: Page) => page.getByRole('heading', { name: "Hi, I'm Piotr." });
+  const input = (page: Page) => page.getByRole('textbox', { name: /Ask Byte a question/ });
+
+  test('clicking the input expands it; Esc and the close button shrink it back', async ({ page }) => {
+    await page.goto('/');
+    await input(page).click();
+    await expect(hero(page)).toBeHidden();
+    await expect(page.getByRole('button', { name: 'Close full chat' })).toHaveAttribute('aria-expanded', 'true');
+    await expect(input(page)).toBeFocused();
+
+    await page.keyboard.press('Escape');
+    await expect(hero(page)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Expand chat' })).toHaveAttribute('aria-expanded', 'false');
+
+    await page.getByRole('button', { name: 'Expand chat' }).click();
+    await expect(hero(page)).toBeHidden();
+    await expect(input(page)).toBeFocused();
+    const close = page.getByRole('button', { name: 'Close full chat' });
+    await close.click();
+    await expect(hero(page)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Expand chat' })).toBeFocused();
+  });
+
+  test('keyboard focus alone does not expand it, typing does', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Keyboard navigation is checked on desktop');
+    await page.goto('/');
+    await input(page).focus();
+    await expect(hero(page)).toBeVisible();
+    await page.keyboard.type('Hi');
+    await expect(hero(page)).toBeHidden();
+  });
+
+  test('asking a question shows it with a placeholder reply', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'What has he built?' }).click();
+    const log = page.getByRole('log', { name: 'Conversation with Byte' });
+    await expect(log.getByText('What has he built?')).toBeVisible();
+    await expect(log.getByText(/still in training/).last()).toBeVisible();
+
+    await input(page).fill('Where does he study?');
+    await input(page).press('Enter');
+    await expect(log.getByText('Where does he study?')).toBeVisible();
+    await expect(input(page)).toHaveValue('');
+  });
+
+  test('the expanded chat still fits one desktop screen', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Desktop layout only');
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+    await input(page).click();
+    await expect(hero(page)).toBeHidden();
+    const chat = await page.locator('[data-chat]').boundingBox();
+    const bento = await page.locator('[data-bento]').boundingBox();
+    expect(chat).toEqual(bento);
+    const scrolls = await page.evaluate(() => document.documentElement.scrollHeight > window.innerHeight);
+    expect(scrolls).toBe(false);
+  });
+
+  for (const theme of ['light', 'dark'] as const) {
+    test(`expanded chat has no axe violations in ${theme} mode`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
+      await page.goto('/');
+      await page.getByRole('button', { name: "What's his stack?" }).click();
+      await expect(
+        page
+          .getByRole('log')
+          .getByText(/still in training/)
+          .last(),
+      ).toBeVisible();
+      const results = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'])
+        .analyze();
+      expect(results.violations).toEqual([]);
     });
   }
 });

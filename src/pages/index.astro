@@ -11,13 +11,20 @@ const badge = 'inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm
 ---
 
 <BaseLayout>
+  <!-- Always-present page heading: the visible hero greeting is hidden while the chat is expanded. -->
+  <h1 class="sr-only">
+    {profile.name}, {profile.role.toLowerCase()}
+  </h1>
   <!--
     On desktop screens tall enough to hold it (the `fit` variant), the bento fills exactly one
     viewport: 4 columns × 3 rows. The bottom row takes what its tiles need and the hero/chat rows share
     the rest. Rows never shrink below their content (minmax(auto, 1fr)), so on shorter screens or with
     zoomed text the page scrolls instead of clipping.
   -->
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 fit:min-h-full fit:gap-3.5 fit-short:gap-3 fit:grid-rows-[minmax(auto,1fr)_minmax(auto,1fr)_auto]">
+  <div
+    data-bento
+    class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 fit:min-h-full fit:gap-3.5 fit-short:gap-3 fit:grid-rows-[minmax(auto,1fr)_minmax(auto,1fr)_auto]"
+  >
     <!-- Hero -->
     <section
       aria-labelledby="hero-title"
@@ -43,12 +50,12 @@ const badge = 'inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm
             {[profile.location, profile.school, profile.timezone].filter(Boolean).join(' · ')}
           </p>
         </div>
-        <h1
+        <h2
           id="hero-title"
           class="mt-6 font-display text-[clamp(42px,5vw,66px)] leading-[0.98] font-extrabold tracking-[-0.045em] fit:mt-[clamp(12px,2.5dvh,28px)] fit:text-[clamp(40px,min(5vw,7dvh),68px)]"
         >
           Hi, I'm {profile.firstName}.
-        </h1>
+        </h2>
         <p class="mt-2 text-[15px] text-muted fit:mt-1">a.k.a. {profile.nickname}</p>
         <p class="mt-4 max-w-[34ch] fit:mt-[clamp(8px,1.5dvh,16px)] fit:max-w-[42ch] text-[clamp(18px,1.8vw,21px)] leading-normal fit:text-[clamp(17px,min(1.6vw,2.4dvh),21px)]">
           {profile.tagline}
