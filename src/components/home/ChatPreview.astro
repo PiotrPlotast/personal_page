@@ -172,14 +172,21 @@ const { agent } = await getProfile(locale);
       if (label) toggle.setAttribute('aria-label', label);
     };
 
+    // Each step keeps handles to the animations it starts and only ever cancels those. Cancelling
+    // "every animation on an element" would also kill animations a newer transition just started.
     const fade = (elements: Element[], from: number, to: number, duration: number) =>
-      Promise.all(
-        elements.map(
-          (el) =>
-            el.animate([{ opacity: from }, { opacity: to }], { duration, easing: 'ease-out', fill: 'forwards' })
-              .finished,
-        ),
+      elements.map((el) =>
+        el.animate([{ opacity: from }, { opacity: to }], { duration, easing: 'ease-out', fill: 'forwards' }),
       );
+    // A cancelled animation rejects `finished`; for us that just means "done".
+    const done = (animations: Animation[]) => Promise.all(animations.map((a) => a.finished.catch(() => undefined)));
+    const clear = (animations: Animation[]) => animations.forEach((a) => a.cancel());
+    // Fade-ins still running after a transition ends; the next transition stops them first.
+    let lingering: Animation[] = [];
+    const settle = (animations: Animation[]) => {
+      lingering = animations;
+      void done(animations).then(() => clear(animations));
+    };
 
     // Grow: fade the other tiles out, lay the chat out at full size, then reveal it from its old
     // footprint with an expanding rounded clip so text never stretches. Shrink runs the reverse.
@@ -195,43 +202,36 @@ const { agent } = await getProfile(locale);
         return;
       }
       busy = true;
+      clear(lingering);
       try {
         if (expanded) {
           const small = chat.getBoundingClientRect();
-          await fade(otherTiles(), 1, 0, 140);
+          const fadeOut = fade(otherTiles(), 1, 0, 140);
+          await done(fadeOut);
           apply(true);
-          for (const tile of otherTiles()) for (const a of tile.getAnimations()) a.cancel();
+          clear(fadeOut);
           const big = chat.getBoundingClientRect();
-          const content = [...chat.children];
-          void fade(content, 0, 1, 260).then(() =>
-            content.forEach((el) => el.getAnimations().forEach((a) => a.cancel())),
-          );
-          await chat.animate(
-            [{ clipPath: insetClip(small, big, radius()) }, { clipPath: insetClip(big, big, radius()) }],
-            {
+          settle(fade([...chat.children], 0, 1, 260));
+          await done([
+            chat.animate([{ clipPath: insetClip(small, big, radius()) }, { clipPath: insetClip(big, big, radius()) }], {
               duration: 380,
               easing: ease,
-            },
-          ).finished;
+            }),
+          ]);
           if (chat.getBoundingClientRect().top < 0) chat.scrollIntoView({ block: 'start' });
         } else {
           const big = chat.getBoundingClientRect();
           apply(false);
           const small = chat.getBoundingClientRect();
           apply(true);
-          await chat.animate(
+          const shrink = chat.animate(
             [{ clipPath: insetClip(big, big, radius()) }, { clipPath: insetClip(small, big, radius()) }],
-            {
-              duration: 320,
-              easing: ease,
-              fill: 'forwards',
-            },
-          ).finished;
-          apply(false);
-          for (const a of chat.getAnimations()) a.cancel();
-          void fade([...chat.children, ...otherTiles()], 0, 1, 200).then(() =>
-            [...chat.children, ...otherTiles()].forEach((el) => el.getAnimations().forEach((a) => a.cancel())),
+            { duration: 320, easing: ease, fill: 'forwards' },
           );
+          await done([shrink]);
+          apply(false);
+          clear([shrink]);
+          settle(fade([...chat.children, ...otherTiles()], 0, 1, 200));
         }
       } finally {
         busy = false;

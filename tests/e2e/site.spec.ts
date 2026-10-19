@@ -104,6 +104,24 @@ test.describe('chat expands over the bento', () => {
     await expect(page.getByRole('button', { name: 'Expand chat' })).toBeFocused();
   });
 
+  test('re-opening right after closing works and throws no errors', async ({ page }) => {
+    // Regression: cleanup of the closing fade used to cancel the next opening animation.
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    await page.goto('/');
+    for (let round = 0; round < 3; round++) {
+      await input(page).click();
+      await expect(hero(page)).toBeHidden();
+      await page.keyboard.press('Escape');
+      await expect(hero(page)).toBeVisible();
+      await page.getByRole('button', { name: 'Expand chat' }).click();
+      await expect(hero(page)).toBeHidden();
+      await page.getByRole('button', { name: 'Close full chat' }).click();
+      await expect(hero(page)).toBeVisible();
+    }
+    expect(errors).toEqual([]);
+  });
+
   test('keyboard focus alone does not expand it, typing does', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Keyboard navigation is checked on desktop');
     await page.goto('/');
