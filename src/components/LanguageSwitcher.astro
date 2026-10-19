@@ -1,0 +1,31 @@
+---
+import { localeNames, localeTags, localizePath, locales, type Locale } from '~/i18n/config';
+import { useTranslations } from '~/i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<nav aria-label={t('lang.label')}>
+  <ul class="flex rounded-full bg-bg p-0.5">
+    {locales.map((code) => (
+      <li>
+        <a
+          href={localizePath(Astro.url.pathname, code)}
+          hreflang={localeTags[code].lang}
+          aria-current={code === locale ? 'true' : undefined}
+          class="inline-flex min-h-10 min-w-11 items-center justify-center rounded-full px-2.5 text-sm font-bold text-muted no-underline transition-colors hover:text-fg aria-[current=true]:bg-tile aria-[current=true]:text-fg"
+        >
+          <span aria-hidden="true">{code.toUpperCase()}</span>
+          <span class="sr-only" lang={localeTags[code].lang}>
+            {code.toUpperCase()} {localeNames[code]}
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

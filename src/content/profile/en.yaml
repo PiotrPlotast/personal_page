@@ -1,0 +1,44 @@
+# Profile, English. Fields marked TODO are hidden on the site until you fill them in.
+name: Piotr Płotast
+firstName: Piotr
+nickname: Pietrell
+shortName: Piotr P.
+role: Frontend developer
+location: Poland
+timezone: CET
+# TODO(content): school or university, e.g. "Warsaw University of Technology · 2nd year".
+# school:
+availability:
+  open: true
+  # TODO(content): add when, e.g. "Open to internships from Summer 2027".
+  label: Open to internships
+tagline: A frontend developer and student from Poland. I like building beautiful, functional apps, and writing about what I learn along the way.
+about: My priority is to keep learning and getting better. Right now I'm going deeper into React, and exploring design, UX and backend topics. Always open to new projects and collaborations with other developers.
+skills:
+  - TypeScript
+  - React
+  - React Native
+  - Expo
+  - Astro
+  - Tailwind
+  - Supabase
+  - Electron
+  - JavaScript
+  - HTML & CSS
+  - Git
+now:
+  - Building Accountability Buddies with Expo and Supabase
+  - Going deeper into React, design and UX
+# TODO(content): email and LinkedIn / Discord links.
+socials:
+  - label: GitHub
+    href: https://github.com/PiotrPlotast
+agent:
+  name: Byte
+  tagline: My AI sidekick. Knows my CV better than I do.
+  greeting: Psst. I'm Byte, Piotr's AI sidekick. I'm still in training, but go on, ask me something.
+  suggestions:
+    - What has he built?
+    - Open to internships?
+    - What's his stack?
+  reply: I'm still in training, so I can't answer that one yet. The real me arrives soon! Until then, Piotr's projects and contact page have you covered.

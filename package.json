@@ -1,0 +1,59 @@
+{
+  "name": "personal-page",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Piotr Płotast's personal page: portfolio, blog and an AI agent that answers questions about me.",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview:static": "sirv .vercel/output/static --port 4321 --single false --quiet",
+    "check": "astro check",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "lhci": "lhci autorun",
+    "verify": "pnpm format:check && pnpm lint && pnpm check && pnpm test && pnpm build && pnpm test:e2e",
+    "prepare": "lefthook install || true"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "3.7.4",
+    "@astrojs/vercel": "11.0.15",
+    "@fontsource-variable/bricolage-grotesque": "5.3.0",
+    "@fontsource-variable/dm-sans": "5.3.0",
+    "astro": "7.4.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@axe-core/playwright": "4.14.0",
+    "@eslint/js": "10.0.1",
+    "@lhci/cli": "0.15.1",
+    "@playwright/test": "1.64.1",
+    "@tailwindcss/vite": "4.3.3",
+    "eslint": "10.13.0",
+    "eslint-plugin-astro": "3.2.1",
+    "eslint-plugin-jsx-a11y-x": "0.2.0",
+    "globals": "17.13.0",
+    "lefthook": "2.2.2",
+    "prettier": "3.9.10",
+    "prettier-plugin-astro": "1.1.1",
+    "prettier-plugin-tailwindcss": "0.8.1",
+    "sirv-cli": "3.0.1",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.2",
+    "vitest": "5.0.5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "lefthook"
+    ]
+  }
+}

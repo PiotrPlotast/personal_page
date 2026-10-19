@@ -1,0 +1,8 @@
+# Example entry (draft: hidden on the site). Copy this file for each school, job, course or hackathon.
+type: course
+title: Frontend Mentor challenges
+organization: Frontend Mentor
+start: '2023'
+description: Building real-world UI designs from Frontend Mentor to practise HTML, CSS, SCSS and JavaScript.
+link: https://www.frontendmentor.io
+draft: true

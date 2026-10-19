@@ -1,0 +1,90 @@
+---
+import { Font } from 'astro:assets';
+import Header from '~/components/Header.astro';
+import Footer from '~/components/Footer.astro';
+import { localeFromPath, localeTags, localizePath, locales, type Locale } from '~/i18n/config';
+import { useTranslations } from '~/i18n/ui';
+import { getProfile } from '~/lib/content';
+import '~/styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Defaults to the locale implied by the URL. */
+  locale?: Locale;
+  /** Emit hreflang alternates and the language switcher (off for pages that exist in one language only). */
+  alternates?: boolean;
+}
+
+const { title, alternates = true } = Astro.props;
+const locale = Astro.props.locale ?? localeFromPath(Astro.url.pathname);
+const t = useTranslations(locale);
+const profile = await getProfile(locale);
+const description = Astro.props.description ?? t('site.description');
+const fullTitle = title ? `${title} · ${profile.name}` : `${profile.name} · ${profile.role}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const altLinks = alternates
+  ? [
+      ...locales.map((alt) => ({
+        hreflang: localeTags[alt].lang,
+        href: new URL(localizePath(Astro.url.pathname, alt), Astro.site),
+      })),
+      { hreflang: 'x-default', href: new URL(localizePath(Astro.url.pathname, 'en'), Astro.site) },
+    ]
+  : [];
+---
+
+<!doctype html>
+<html lang={localeTags[locale].lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {altLinks.map((link) => (
+      <link rel="alternate" hreflang={link.hreflang} href={link.href} />
+    ))}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#eceef1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#131417" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={localeTags[locale].og} />
+    <meta name="generator" content={Astro.generator} />
+    <Font cssVariable="--font-bricolage" preload />
+    <Font cssVariable="--font-dm-sans" preload />
+    <script is:inline>
+      // Set the theme before first paint to avoid a flash. Mirrors resolveTheme() in src/lib/theme.ts.
+      (() => {
+        let stored = null;
+        try {
+          stored = localStorage.getItem('theme');
+        } catch {
+          // Storage unavailable (private mode): fall back to the system theme.
+        }
+        const dark =
+          stored === 'dark' || stored === 'light'
+            ? stored === 'dark'
+            : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script>
+  </head>
+  <body class="min-h-dvh bg-bg text-base leading-relaxed text-fg fit:grid fit:grid-rows-[auto_1fr_auto]">
+    <a
+      href="#main"
+      class="absolute top-2 -left-[9999px] z-10 rounded-xl bg-fg px-4 py-2.5 text-bg no-underline focus:left-4"
+    >
+      {t('a11y.skip')}
+    </a>
+    <Header locale={locale} shortName={profile.shortName} switcher={alternates} />
+    <main id="main" tabindex="-1" class="mx-auto w-full max-w-310 px-6 pt-6 pb-14 focus:outline-none fit:pt-3 fit:pb-3">
+      <slot />
+    </main>
+    <Footer locale={locale} name={profile.name} />
+  </body>
+</html>
