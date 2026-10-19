@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 import tailwindcss from '@tailwindcss/vite';
 
@@ -21,6 +22,18 @@ export default defineConfig({
   output: 'static',
   adapter: vercel(),
   trailingSlash: 'ignore',
+  // English lives at `/`, Polish under `/pl/`. Helpers for this are in src/i18n/config.ts.
+  i18n: {
+    locales: ['en', 'pl'],
+    defaultLocale: 'en',
+    routing: { prefixDefaultLocale: false },
+  },
+  integrations: [
+    sitemap({
+      i18n: { defaultLocale: 'en', locales: { en: 'en', pl: 'pl' } },
+      filter: (page) => !page.endsWith('/404/'),
+    }),
+  ],
   vite: {
     plugins: [tailwindcss()],
   },

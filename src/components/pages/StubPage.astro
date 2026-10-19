@@ -1,0 +1,18 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import ComingSoon from '~/components/ComingSoon.astro';
+import type { Locale } from '~/i18n/config';
+import { useTranslations } from '~/i18n/ui';
+
+interface Props {
+  locale: Locale;
+  page: 'projects' | 'blog' | 'about' | 'contact';
+}
+
+const { locale, page } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<BaseLayout title={t(`page.${page}`)} locale={locale}>
+  <ComingSoon locale={locale} page={page} />
+</BaseLayout>

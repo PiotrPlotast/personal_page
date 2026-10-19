@@ -1,17 +1,26 @@
 ---
-import { profile } from '~/data/profile';
+import type { Locale } from '~/i18n/config';
+import { useTranslations } from '~/i18n/ui';
 
+interface Props {
+  locale: Locale;
+  name: string;
+}
+
+const { locale, name } = Astro.props;
+const t = useTranslations(locale);
 const year = new Date().getFullYear();
+const source = 'https://github.com/PiotrPlotast/personal_page';
 ---
 
 <footer class="mx-auto flex w-full max-w-310 flex-wrap justify-between gap-3 px-6 pb-8 text-sm text-muted fit:pb-3">
   <p>
-    © {year} {profile.name}
+    © {year} {name}
   </p>
   <p>
-    Built with Astro ·{' '}
-    <a href={profile.source} class="underline underline-offset-2 hover:text-fg">
-      Source on GitHub
+    {t('footer.builtWith')} ·{' '}
+    <a href={source} class="underline underline-offset-2 hover:text-fg">
+      {t('footer.source')}
     </a>
   </p>
 </footer>

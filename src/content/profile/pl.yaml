@@ -1,0 +1,44 @@
+# Profil, po polsku. Pola oznaczone TODO są ukryte na stronie, dopóki ich nie uzupełnisz.
+name: Piotr Płotast
+firstName: Piotr
+nickname: Pietrell
+shortName: Piotr P.
+role: Frontend developer
+location: Polska
+timezone: CET
+# TODO(content): uczelnia lub szkoła, np. "Politechnika Warszawska · 2. rok".
+# school:
+availability:
+  open: true
+  # TODO(content): od kiedy, np. "Szukam stażu od lata 2027".
+  label: Szukam stażu
+tagline: Frontend developer i student z Polski. Lubię tworzyć piękne, funkcjonalne aplikacje i pisać o tym, czego się po drodze uczę.
+about: Moim priorytetem jest ciągła nauka i rozwój. Teraz zgłębiam Reacta i poznaję design, UX oraz tematy backendowe. Zawsze chętnie biorę udział w nowych projektach i współpracuję z innymi programistami.
+skills:
+  - TypeScript
+  - React
+  - React Native
+  - Expo
+  - Astro
+  - Tailwind
+  - Supabase
+  - Electron
+  - JavaScript
+  - HTML i CSS
+  - Git
+now:
+  - Tworzę Accountability Buddies w Expo i Supabase
+  - Zgłębiam Reacta, design i UX
+# TODO(content): e-mail oraz linki do LinkedIna / Discorda.
+socials:
+  - label: GitHub
+    href: https://github.com/PiotrPlotast
+agent:
+  name: Byte
+  tagline: Mój AI-pomocnik. Zna moje CV lepiej niż ja.
+  greeting: Psst. Jestem Byte, AI-pomocnik Piotra. Wciąż się uczę, ale śmiało, zapytaj o coś.
+  suggestions:
+    - Co zbudował?
+    - Szuka stażu?
+    - Jakiego stacku używa?
+  reply: Wciąż się uczę, więc na to jeszcze nie odpowiem. Prawdziwy ja pojawi się wkrótce! Do tego czasu zajrzyj do projektów albo na stronę kontaktu.

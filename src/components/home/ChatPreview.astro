@@ -1,17 +1,26 @@
 ---
 /**
  * The "Ask Byte" chat tile. Clicking the input, a suggestion, typing or the expand button grows it
- * to cover the whole bento; the close button or Esc shrinks it back. Phase 4 swaps the placeholder reply below for the real streaming agent.
+ * to cover the whole bento; the close button or Esc shrinks it back. Phase 4 swaps the placeholder
+ * reply (from the profile content) for the real streaming agent.
  */
-import { agent } from '~/data/profile';
+import type { Locale } from '~/i18n/config';
+import { useTranslations } from '~/i18n/ui';
+import { getProfile } from '~/lib/content';
 
-const reply = `I'm still in training, so I can't answer that one yet. The real me arrives soon! Until then, Piotr's projects and contact page have you covered.`;
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const { agent } = await getProfile(locale);
 ---
 
 <section
   aria-labelledby="chat-title"
   data-chat
-  data-reply={reply}
+  data-reply={agent.reply}
   class="flex flex-col gap-3.5 rounded-tile border border-ink-border bg-ink p-6 text-ink-fg sm:col-span-2 lg:row-span-2 fit:gap-3 fit:p-5 fit-short:p-4 data-expanded:min-h-[calc(100dvh-9rem)] fit:data-expanded:min-h-0"
 >
   <div class="flex items-center gap-3">
@@ -23,19 +32,21 @@ const reply = `I'm still in training, so I can't answer that one yet. The real m
     </span>
     <div class="min-w-0 flex-1">
       <h2 id="chat-title" class="font-display text-[22px] font-bold tracking-tight">
-        Ask {agent.name}
+        {t('chat.title')}
       </h2>
       <p class="text-sm text-ink-muted">{agent.tagline}</p>
     </div>
     <span class="hidden rounded-full border border-ink-line px-3 py-1 text-xs font-bold text-ink-muted sm:inline">
-      In training
+      {t('chat.status')}
     </span>
     <button
       type="button"
       data-chat-toggle
       aria-expanded="false"
       aria-controls="chat-log"
-      aria-label="Expand chat"
+      aria-label={t('chat.expand')}
+      data-label-expand={t('chat.expand')}
+      data-label-collapse={t('chat.collapse')}
       class="grid size-11 flex-none cursor-pointer place-items-center rounded-full border border-ink-line text-ink-fg transition-colors hover:bg-ink-raise"
     >
       <svg
@@ -72,7 +83,7 @@ const reply = `I'm still in training, so I can't answer that one yet. The real m
   <div
     id="chat-log"
     role="log"
-    aria-label={`Conversation with ${agent.name}`}
+    aria-label={t('chat.log')}
     data-chat-log
     class="flex min-h-40 flex-1 flex-col gap-2.5 overflow-y-auto fit:min-h-0 in-data-expanded:mx-auto in-data-expanded:min-h-0 in-data-expanded:w-full in-data-expanded:max-w-3xl"
   >
@@ -80,7 +91,7 @@ const reply = `I'm still in training, so I can't answer that one yet. The real m
   </div>
 
   <ul
-    aria-label="Suggested questions"
+    aria-label={t('chat.suggestions')}
     class="flex flex-wrap gap-2 in-data-expanded:mx-auto in-data-expanded:w-full in-data-expanded:max-w-3xl"
   >
     {agent.suggestions.map((question) => (
@@ -101,7 +112,7 @@ const reply = `I'm still in training, so I can't answer that one yet. The real m
     class="flex gap-2 rounded-full bg-ink-raise p-1.5 in-data-expanded:mx-auto in-data-expanded:w-full in-data-expanded:max-w-3xl"
   >
     <label for="ask-byte" class="sr-only">
-      Ask {agent.name} a question about Piotr
+      {t('chat.inputLabel')}
     </label>
     <input
       id="ask-byte"
@@ -109,12 +120,12 @@ const reply = `I'm still in training, so I can't answer that one yet. The real m
       type="text"
       autocomplete="off"
       maxlength="500"
-      placeholder="Ask anything about Piotr…"
+      placeholder={t('chat.placeholder')}
       class="min-h-11 min-w-0 flex-1 rounded-full bg-transparent px-4 text-ink-fg placeholder:text-ink-muted"
     />
     <button
       type="submit"
-      aria-label="Send question"
+      aria-label={t('chat.send')}
       class="grid size-11 flex-none cursor-pointer place-items-center rounded-full bg-lime text-on-lime transition-opacity hover:opacity-85"
     >
       <svg
@@ -157,7 +168,8 @@ const reply = `I'm still in training, so I can't answer that one yet. The real m
       chat.toggleAttribute('data-expanded', expanded);
       bento.toggleAttribute('data-chat-expanded', expanded);
       toggle.setAttribute('aria-expanded', String(expanded));
-      toggle.setAttribute('aria-label', expanded ? 'Close full chat' : 'Expand chat');
+      const label = expanded ? toggle.dataset['labelCollapse'] : toggle.dataset['labelExpand'];
+      if (label) toggle.setAttribute('aria-label', label);
     };
 
     const fade = (elements: Element[], from: number, to: number, duration: number) =>

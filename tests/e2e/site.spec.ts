@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
-const pages = ['/', '/projects', '/blog', '/about', '/contact', '/404'];
+const pages = ['/', '/projects', '/blog', '/about', '/contact', '/404', '/pl/', '/pl/projects', '/pl/about'];
 
 test.describe('accessibility (axe, WCAG 2.2 AA)', () => {
   for (const theme of ['light', 'dark'] as const) {
@@ -56,11 +56,16 @@ test.describe('home bento fits one screen on desktop', () => {
     { width: 1366, height: 657 },
     { width: 1280, height: 720 },
   ];
-  for (const viewport of viewports) {
-    test(`no scrolling at ${viewport.width}×${viewport.height}`, async ({ page, isMobile }) => {
+  for (const [path, viewport] of [
+    ...viewports.map((v) => ['/', v] as const),
+    // Polish strings run longer; check the tightest sizes too.
+    ['/pl/', { width: 1440, height: 900 }] as const,
+    ['/pl/', { width: 1366, height: 657 }] as const,
+  ]) {
+    test(`${path}: no scrolling at ${viewport.width}×${viewport.height}`, async ({ page, isMobile }) => {
       test.skip(isMobile, 'Desktop layout only; on phones the tiles stack and scroll');
       await page.setViewportSize(viewport);
-      await page.goto('/');
+      await page.goto(path);
       const { scrollHeight, innerHeight } = await page.evaluate(() => ({
         scrollHeight: document.documentElement.scrollHeight,
         innerHeight: window.innerHeight,
@@ -173,5 +178,59 @@ test.describe('theme toggle', () => {
 
     await page.goto('/about');
     await expect(html).toHaveAttribute('data-theme', 'dark');
+  });
+});
+
+test.describe('English and Polish', () => {
+  test('Polish pages are marked as Polish and translated', async ({ page }) => {
+    await page.goto('/pl/');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'pl');
+    await expect(page.getByRole('heading', { name: 'Cześć, jestem Piotr.' })).toBeVisible();
+    await expect(
+      page.getByRole('navigation', { name: 'Główna' }).getByRole('link', { name: 'Projekty' }),
+    ).toBeVisible();
+    await expect(page.getByRole('textbox', { name: "Zadaj Byte'owi pytanie o Piotra" })).toBeVisible();
+    await expect(page.locator('[data-theme-toggle]')).toHaveAttribute('aria-label', /motyw/);
+  });
+
+  test('the switcher keeps you on the same page', async ({ page }) => {
+    await page.goto('/projects');
+    const languages = page.getByRole('navigation', { name: 'Language' });
+    await expect(languages.getByRole('link', { name: /EN English/ })).toHaveAttribute('aria-current', 'true');
+    await languages.getByRole('link', { name: /PL Polski/ }).click();
+    await expect(page).toHaveURL(/\/pl\/projects\/?$/);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'pl');
+
+    await page
+      .getByRole('navigation', { name: 'Język' })
+      .getByRole('link', { name: /EN English/ })
+      .click();
+    await expect(page).toHaveURL(/\/projects\/?$/);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  });
+
+  test('pages link to their translation for search engines', async ({ page }) => {
+    await page.goto('/pl/about');
+    const alternates = await page
+      .locator('link[rel="alternate"][hreflang]')
+      .evaluateAll((links) =>
+        links.map((l) => [
+          l.getAttribute('hreflang'),
+          new URL(l.getAttribute('href') ?? '').pathname.replace(/\/$/, ''),
+        ]),
+      );
+    expect(alternates).toEqual([
+      ['en', '/about'],
+      ['pl', '/pl/about'],
+      ['x-default', '/about'],
+    ]);
+  });
+
+  test('the chat works in Polish', async ({ page }) => {
+    await page.goto('/pl/');
+    await page.getByRole('button', { name: 'Co zbudował?' }).click();
+    const log = page.getByRole('log', { name: "Rozmowa z Byte'em" });
+    await expect(log.getByText(/Wciąż się uczę, więc/)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Zamknij pełny czat' })).toBeVisible();
   });
 });

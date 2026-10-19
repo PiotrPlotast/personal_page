@@ -16,6 +16,14 @@ export function nextTheme(current: Theme): Theme {
   return current === 'dark' ? 'light' : 'dark';
 }
 
-export function themeToggleLabel(current: Theme): string {
-  return current === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+export interface ThemeLabels {
+  toDark: string;
+  toLight: string;
+}
+
+const englishLabels: ThemeLabels = { toDark: 'Switch to dark theme', toLight: 'Switch to light theme' };
+
+/** The toggle's accessible name describes the action it will take, in the page's language. */
+export function themeToggleLabel(current: Theme, labels: ThemeLabels = englishLabels): string {
+  return current === 'dark' ? labels.toLight : labels.toDark;
 }

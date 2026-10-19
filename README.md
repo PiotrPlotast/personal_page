@@ -44,14 +44,34 @@ Git hooks (lefthook): **pre-commit** formats and lints staged files, **pre-push*
 
 ```
 src/
-  components/      Header, Footer, ThemeToggle, home page tiles
-  data/profile.ts  Site content for now (moves to content collections in phase 2)
-  layouts/         BaseLayout: <head>, fonts, theme bootstrapping, skip link
-  lib/             Small tested utilities (theme resolution)
-  pages/           Routes
-  styles/          Tailwind entry + design tokens (light/dark)
-tests/e2e/         Playwright specs (a11y in both themes, theme toggle, navigation)
+  content/           All site content, one folder per language (see "Editing content")
+  content.config.ts  Schemas for the content, checked at build time
+  components/        Header, Footer, language switcher, theme toggle, home tiles, page bodies
+  i18n/              Locales, URL helpers and the interface dictionary (EN + PL)
+  layouts/           BaseLayout: <head>, hreflang, fonts, theme bootstrapping, skip link
+  lib/               Content loading with English fallback, small tested utilities
+  pages/             Routes: English at /, Polish under /pl/
+  styles/            Tailwind entry + design tokens (light/dark)
+tests/e2e/           Playwright specs (a11y in both themes and languages, chat, layout, i18n)
 ```
+
+## Editing content
+
+Everything on the site comes from files in `src/content/`, so changing text never means touching code. Each
+collection has an `en/` and a `pl/` folder; a file with the same name in both is the same item in two languages.
+If a Polish file is missing, the English one is shown instead.
+
+| What                | Where                                       | Notes                                         |
+| ------------------- | ------------------------------------------- | --------------------------------------------- |
+| Bio, skills, Byte   | `src/content/profile/en.yaml`, `pl.yaml`    | Availability, socials, the agent's greeting   |
+| Projects            | `src/content/projects/<lang>/<slug>.md`     | `featured: true` puts one on the home page    |
+| Blog posts          | `src/content/posts/<lang>/<slug>.md(x)`     | `draft: true` hides a post outside `pnpm dev` |
+| Experience          | `src/content/experience/<lang>/<slug>.yaml` | School, jobs, courses, hackathons             |
+| Buttons, menus, etc | `src/i18n/ui.ts`                            | Polish must define every key (type-checked)   |
+
+Fields are validated when the site builds: a typo or missing required field fails `pnpm build` with a message
+pointing at the file. Anything marked `TODO(content)` is waiting for real information and stays hidden until filled
+in.
 
 ## Accessibility
 
@@ -66,7 +86,7 @@ tests/e2e/         Playwright specs (a11y in both themes, theme toggle, navigati
 
 - [x] **Phase 0:** design mockups
 - [x] **Phase 1:** project setup, design tokens, home page, CI
-- [ ] **Phase 2:** content collections (projects, posts, experience), English + Polish
+- [x] **Phase 2:** content collections (projects, posts, experience), English + Polish
 - [ ] **Phase 3:** projects with case studies, blog (MDX, tags, RSS, search), About + CV, SEO
 - [ ] **Phase 4:** Byte, the AI agent (Claude API, tool use, streaming, rate limiting, Turnstile)
 - [ ] **Phase 5:** contact form (Resend + Turnstile)

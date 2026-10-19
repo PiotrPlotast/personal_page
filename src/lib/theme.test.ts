@@ -26,6 +26,12 @@ describe('themeToggleLabel', () => {
     expect(themeToggleLabel('light')).toBe('Switch to dark theme');
     expect(themeToggleLabel('dark')).toBe('Switch to light theme');
   });
+
+  it('uses translated labels when given', () => {
+    const pl = { toDark: 'Włącz ciemny motyw', toLight: 'Włącz jasny motyw' };
+    expect(themeToggleLabel('light', pl)).toBe('Włącz ciemny motyw');
+    expect(themeToggleLabel('dark', pl)).toBe('Włącz jasny motyw');
+  });
 });
 
 describe('isTheme', () => {

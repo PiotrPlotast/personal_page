@@ -1,0 +1,174 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import ChatPreview from '~/components/home/ChatPreview.astro';
+import { localizePath, type Locale } from '~/i18n/config';
+import { useTranslations } from '~/i18n/ui';
+import { getProfile, getProjects } from '~/lib/content';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const profile = await getProfile(locale);
+const [featured, ...rest] = await getProjects(locale);
+if (!featured) throw new Error('Add at least one project in src/content/projects');
+const more = rest.slice(0, 2);
+
+const tile = 'rounded-tile border border-line bg-tile p-6 fit:p-5 fit-short:p-4';
+const eyebrow = 'text-sm font-bold tracking-[0.06em] text-muted uppercase';
+const pill =
+  'inline-flex min-h-12 items-center rounded-full px-5.5 font-bold no-underline transition-opacity hover:opacity-85';
+const badge = 'inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-bold';
+---
+
+<BaseLayout locale={locale}>
+  <!-- Always-present page heading: the visible hero greeting is hidden while the chat is expanded. -->
+  <h1 class="sr-only">
+    {profile.name}, {profile.role.toLowerCase()}
+  </h1>
+  <!--
+    On desktop screens tall enough to hold it (the `fit` variant), the bento fills exactly one
+    viewport: 4 columns × 3 rows. The bottom row takes what its tiles need and the hero/chat rows share
+    the rest. Rows never shrink below their content (minmax(auto, 1fr)), so on shorter screens or with
+    zoomed text the page scrolls instead of clipping.
+  -->
+  <div
+    data-bento
+    class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 fit:min-h-full fit:gap-3.5 fit-short:gap-3 fit:grid-rows-[minmax(auto,1fr)_minmax(auto,1fr)_auto]"
+  >
+    <!-- Hero -->
+    <section
+      aria-labelledby="hero-title"
+      class:list={[
+        tile,
+        'flex flex-col justify-between gap-6 p-[clamp(24px,3.5vw,40px)] sm:col-span-2 lg:row-span-2 fit:gap-[clamp(12px,2.5dvh,24px)] fit:p-[clamp(20px,min(3vw,4dvh),40px)] fit-short:p-5',
+      ]}
+    >
+      <div>
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- TODO(content): replace with a photo via astro:assets <Image>. -->
+          <div
+            aria-hidden="true"
+            class="grid size-20 place-items-center rounded-3xl border border-dashed border-line-strong bg-bg font-display text-2xl font-extrabold fit:size-[clamp(56px,8dvh,80px)] fit-short:hidden"
+          >
+            PP
+          </div>
+          {profile.availability.open && (
+            <p class:list={[badge, 'bg-lime text-on-lime']}>
+              <span aria-hidden="true" class="size-2 rounded-full bg-on-lime" />
+              {profile.availability.label}
+            </p>
+          )}
+          <p class:list={[badge, 'bg-bg text-fg']}>
+            {[profile.location, profile.school, profile.timezone].filter(Boolean).join(' · ')}
+          </p>
+        </div>
+        <h2
+          id="hero-title"
+          class="mt-6 font-display text-[clamp(42px,5vw,66px)] leading-[0.98] font-extrabold tracking-[-0.045em] fit:mt-[clamp(12px,2.5dvh,28px)] fit:text-[clamp(40px,min(5vw,7dvh),68px)]"
+        >
+          {t('home.greeting', { name: profile.firstName })}
+        </h2>
+        {profile.nickname && (
+          <p class="mt-2 text-[15px] text-muted fit:mt-1">{t('home.aka', { nickname: profile.nickname })}</p>
+        )}
+        <p class="mt-4 max-w-[34ch] fit:mt-[clamp(8px,1.5dvh,16px)] fit:max-w-[42ch] text-[clamp(18px,1.8vw,21px)] leading-normal fit:text-[clamp(17px,min(1.6vw,2.4dvh),21px)]">
+          {profile.tagline}
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2.5">
+        <a href={localizePath('/projects', locale)} class:list={[pill, 'bg-fg text-bg']}>
+          {t('home.seeWork')}
+        </a>
+        <a href={localizePath('/about', locale)} class:list={[pill, 'border border-line-strong']}>
+          {t('home.moreAbout')}
+        </a>
+      </div>
+    </section>
+
+    <ChatPreview locale={locale} />
+
+    <!-- Featured project -->
+    <section aria-labelledby="featured-title" class:list={[tile, 'flex flex-col gap-2']}>
+      <p class={eyebrow}>{t('home.featured')}</p>
+      <h2 id="featured-title" class="font-display text-2xl leading-tight font-bold tracking-tight fit:text-xl">
+        <a href={featured.data.repo} class="no-underline hover:underline">
+          {featured.data.name}
+        </a>
+      </h2>
+      <p class="text-[15px] text-muted fit:text-sm">{featured.data.summary}</p>
+      <p class="mt-auto pt-1 text-[13px] text-muted">{featured.data.stack.slice(0, 3).join(' · ')}</p>
+    </section>
+
+    <!-- More projects -->
+    <section aria-labelledby="projects-title" class:list={[tile, 'flex flex-col gap-3 fit:gap-2']}>
+      <h2 id="projects-title" class={eyebrow}>
+        {t('home.moreProjects')}
+      </h2>
+      <ul class="flex flex-col gap-3 fit:gap-2">
+        {more.map(({ data: project }) => (
+          <li>
+            <a
+              href={project.repo}
+              class="font-display text-lg font-bold tracking-tight no-underline hover:underline fit:text-base"
+            >
+              {project.name}
+            </a>
+            <p class="text-sm text-muted">
+              {project.kind} · {project.stack[0]}
+            </p>
+          </li>
+        ))}
+      </ul>
+      <a href={localizePath('/projects', locale)} class="mt-auto font-bold text-accent no-underline hover:underline">
+        {t('home.allProjects')}
+      </a>
+    </section>
+
+    <!-- Technologies -->
+    <section aria-labelledby="tech-title" class:list={[tile, 'flex flex-col gap-3']}>
+      <h2 id="tech-title" class={eyebrow}>
+        {t('home.technologies')}
+      </h2>
+      <ul class="flex flex-wrap gap-1.5">
+        {profile.skills.map((skill) => (
+          <li class="rounded-full bg-bg px-3 py-1 text-sm font-medium fit:px-2.5 fit:py-0.5 fit:text-[13px]">
+            {skill}
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- Contact -->
+    <section
+      aria-labelledby="contact-title"
+      class="flex flex-col justify-between gap-4 rounded-tile border border-ink-border bg-ink p-6 text-ink-fg fit:p-5 fit-short:p-4"
+    >
+      <div>
+        <h2 id="contact-title" class="font-display text-2xl leading-tight font-extrabold tracking-tight fit:text-xl">
+          {t('home.contactTitle')}
+        </h2>
+        <p class="mt-1.5 text-[15px] text-ink-muted">{t('home.contactText')}</p>
+      </div>
+      <ul class="flex flex-wrap gap-2">
+        <li>
+          <a
+            href={localizePath('/contact', locale)}
+            class:list={[pill, 'bg-lime px-5 text-on-lime fit:min-h-11 fit:px-4']}
+          >
+            {t('home.writeToMe')}
+          </a>
+        </li>
+        {profile.socials.map((link) => (
+          <li>
+            <a href={link.href} class:list={[pill, 'border border-ink-line px-4.5 fit:min-h-11 fit:px-4']}>
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
+</BaseLayout>

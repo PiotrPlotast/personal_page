@@ -1,19 +1,36 @@
 ---
 import BaseLayout from '~/layouts/BaseLayout.astro';
+import { useTranslations } from '~/i18n/ui';
+
+// One static 404 for the whole site, so it carries a short Polish line too.
+const t = useTranslations('en');
+const pl = useTranslations('pl');
 ---
 
-<BaseLayout title="Page not found">
+<BaseLayout title={t('notFound.title')} locale="en" alternates={false}>
   <section class="mx-auto max-w-2xl rounded-tile border border-line bg-tile p-[clamp(24px,5vw,48px)]">
     <p class="text-sm font-bold tracking-[0.06em] text-muted uppercase">Error 404</p>
     <h1 class="mt-3 font-display text-[clamp(36px,5vw,56px)] leading-none font-extrabold tracking-[-0.04em]">
-      This page doesn't exist.
+      {t('notFound.heading')}
     </h1>
-    <p class="mt-4 text-lg text-muted">Maybe it moved, or maybe it was never here.</p>
-    <a
-      href="/"
-      class="mt-8 inline-flex min-h-12 items-center rounded-full bg-fg px-5.5 font-bold text-bg no-underline hover:opacity-85"
-    >
-      ← Back home
-    </a>
+    <p class="mt-4 text-lg text-muted">{t('notFound.text')}</p>
+    <p class="mt-1 text-muted" lang="pl">
+      {pl('notFound.heading')} {pl('notFound.text')}
+    </p>
+    <div class="mt-8 flex flex-wrap gap-2.5">
+      <a
+        href="/"
+        class="inline-flex min-h-12 items-center rounded-full bg-fg px-5.5 font-bold text-bg no-underline hover:opacity-85"
+      >
+        {t('common.backHome')}
+      </a>
+      <a
+        href="/pl/"
+        lang="pl"
+        class="inline-flex min-h-12 items-center rounded-full border border-line-strong px-5.5 font-bold no-underline hover:opacity-85"
+      >
+        {pl('common.backHome')}
+      </a>
+    </div>
   </section>
 </BaseLayout>
