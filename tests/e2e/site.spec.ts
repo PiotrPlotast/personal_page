@@ -47,6 +47,33 @@ test.describe('home page', () => {
   });
 });
 
+test.describe('home bento fits one screen on desktop', () => {
+  const viewports = [
+    { width: 1920, height: 1080 },
+    { width: 1536, height: 730 },
+    { width: 1440, height: 900 },
+    { width: 1366, height: 657 },
+    { width: 1280, height: 720 },
+  ];
+  for (const viewport of viewports) {
+    test(`no scrolling at ${viewport.width}×${viewport.height}`, async ({ page, isMobile }) => {
+      test.skip(isMobile, 'Desktop layout only; on phones the tiles stack and scroll');
+      await page.setViewportSize(viewport);
+      await page.goto('/');
+      const { scrollHeight, innerHeight } = await page.evaluate(() => ({
+        scrollHeight: document.documentElement.scrollHeight,
+        innerHeight: window.innerHeight,
+      }));
+      expect(scrollHeight).toBeLessThanOrEqual(innerHeight);
+      // Nothing may be clipped inside a tile either.
+      const clipped = await page
+        .locator('main section')
+        .evaluateAll((tiles) => tiles.filter((tile) => tile.scrollHeight > tile.clientHeight + 1).length);
+      expect(clipped).toBe(0);
+    });
+  }
+});
+
 test.describe('theme toggle', () => {
   test('follows the system theme by default', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });

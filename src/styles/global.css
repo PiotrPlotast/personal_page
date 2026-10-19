@@ -3,6 +3,11 @@
 /* Theme is driven by `data-theme` on <html>, set before first paint by BaseLayout. */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
+/* Desktop screens tall enough for the home bento to fit in one viewport without scrolling. */
+@custom-variant fit (@media (min-width: 64rem) and (min-height: 40rem));
+/* Short laptop screens (e.g. 1366×768): trim decorative extras so everything still fits. */
+@custom-variant fit-short (@media (min-width: 64rem) and (min-height: 40rem) and (max-height: 47.99rem));
+
 /*
  * Design tokens. Every text/background pair used on the site meets WCAG AA (≥ 4.5:1)
  * in both themes. Lime is only ever a fill behind --c-on-lime text, never text on white;

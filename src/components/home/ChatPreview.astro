@@ -8,7 +8,7 @@ import { agent } from '~/data/profile';
 
 <section
   aria-labelledby="chat-title"
-  class="flex flex-col gap-3.5 rounded-tile border border-ink-border bg-ink p-6 text-ink-fg sm:col-span-2 lg:row-span-2"
+  class="flex flex-col gap-3.5 fit:gap-3 rounded-tile border border-ink-border bg-ink p-6 text-ink-fg sm:col-span-2 lg:row-span-2 fit:p-5 fit-short:p-4"
 >
   <div class="flex items-center gap-3">
     <span
@@ -26,12 +26,12 @@ import { agent } from '~/data/profile';
     <span class="rounded-full border border-ink-line px-3 py-1 text-xs font-bold text-ink-muted">Coming soon</span>
   </div>
 
-  <div class="flex min-h-40 flex-1 flex-col justify-end">
+  <div class="flex min-h-40 flex-1 flex-col justify-end fit:min-h-0">
     <p class="max-w-[92%] rounded-[18px_18px_18px_6px] bg-ink-raise px-4 py-3">{agent.greeting}</p>
   </div>
 
   <div>
-    <p class="mb-2 text-sm text-ink-muted">You'll be able to ask things like:</p>
+    <p class="mb-2 text-sm text-ink-muted fit:sr-only">You'll be able to ask things like:</p>
     <ul class="flex flex-wrap gap-2">
       {agent.suggestions.map((question) => (
         <li class="rounded-full border border-dashed border-ink-line px-4 py-2.5 text-sm font-medium">{question}</li>

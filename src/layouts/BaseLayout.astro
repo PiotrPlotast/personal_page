@@ -50,7 +50,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       })();
     </script>
   </head>
-  <body class="min-h-screen bg-bg text-base leading-relaxed text-fg">
+  <body class="min-h-dvh bg-bg text-base leading-relaxed text-fg fit:grid fit:grid-rows-[auto_1fr_auto]">
     <a
       href="#main"
       class="absolute top-2 -left-[9999px] z-10 rounded-xl bg-fg px-4 py-2.5 text-bg no-underline focus:left-4"
@@ -58,7 +58,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       Skip to content
     </a>
     <Header />
-    <main id="main" tabindex="-1" class="mx-auto max-w-310 px-6 pt-6 pb-14 focus:outline-none">
+    <main id="main" tabindex="-1" class="mx-auto w-full max-w-310 px-6 pt-6 pb-14 focus:outline-none fit:pt-3 fit:pb-3">
       <slot />
     </main>
     <Footer />
