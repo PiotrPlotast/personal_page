@@ -1,11 +1,13 @@
 ---
 /**
  * The "Ask Byte" chat tile. Clicking the input, a suggestion, typing or the expand button grows it
- * to cover the whole bento; the close button or Esc shrinks it back. Phase 4 swaps the placeholder
- * reply (from the profile content) for the real streaming agent.
+ * to cover the whole bento; the close button or Esc shrinks it back. The chat itself (streaming
+ * answers, history) lives in ChatBody and src/scripts/byte-chat.ts, shared with the floating chat.
  */
+import ChatBody from '~/components/byte/ChatBody.astro';
 import type { Locale } from '~/i18n/config';
 import { useTranslations } from '~/i18n/ui';
+import { chatStrings } from '~/lib/byte/ui-strings';
 import { getProfile } from '~/lib/content';
 
 interface Props {
@@ -20,8 +22,9 @@ const { agent } = await getProfile(locale);
 <section
   aria-labelledby="chat-title"
   data-chat
-  data-reply={agent.reply}
-  class="flex flex-col gap-3.5 rounded-tile border border-ink-border bg-ink p-6 text-ink-fg sm:col-span-2 lg:row-span-2 fit:gap-3 fit:p-5 fit-short:p-4 data-expanded:min-h-[calc(100dvh-9rem)] fit:data-expanded:min-h-0"
+  data-byte
+  data-strings={JSON.stringify(chatStrings(locale))}
+  class="flex flex-col gap-3.5 rounded-tile border border-ink-border bg-ink p-6 text-ink-fg sm:col-span-2 lg:row-span-2 fit:min-h-0 fit:gap-3 fit:p-5 fit-short:p-4 data-expanded:h-[calc(100dvh-9rem)] fit:data-expanded:h-auto"
 >
   <div class="flex items-center gap-3">
     <span
@@ -41,9 +44,30 @@ const { agent } = await getProfile(locale);
     </span>
     <button
       type="button"
+      data-byte-clear
+      hidden
+      aria-label={t('chat.clear')}
+      class="grid size-11 flex-none cursor-pointer place-items-center rounded-full border border-ink-line text-ink-fg transition-colors hover:bg-ink-raise"
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"></path>
+      </svg>
+    </button>
+    <button
+      type="button"
       data-chat-toggle
       aria-expanded="false"
-      aria-controls="chat-log"
+      aria-controls="ask-byte-log"
       aria-label={t('chat.expand')}
       data-label-expand={t('chat.expand')}
       data-label-collapse={t('chat.collapse')}
@@ -80,82 +104,19 @@ const { agent } = await getProfile(locale);
     </button>
   </div>
 
-  <div
-    id="chat-log"
-    role="log"
-    aria-label={t('chat.log')}
-    data-chat-log
-    class="flex min-h-40 flex-1 flex-col gap-2.5 overflow-y-auto fit:min-h-0 in-data-expanded:mx-auto in-data-expanded:min-h-0 in-data-expanded:w-full in-data-expanded:max-w-3xl"
-  >
-    <p class="mt-auto max-w-[92%] rounded-[18px_18px_18px_6px] bg-ink-raise px-4 py-3">{agent.greeting}</p>
-  </div>
-
-  <ul
-    aria-label={t('chat.suggestions')}
-    class="flex flex-wrap gap-2 in-data-expanded:mx-auto in-data-expanded:w-full in-data-expanded:max-w-3xl"
-  >
-    {agent.suggestions.map((question) => (
-      <li>
-        <button
-          type="button"
-          data-chat-suggestion={question}
-          class="min-h-11 cursor-pointer rounded-full border border-ink-line px-4 text-sm font-medium transition-colors hover:bg-ink-raise"
-        >
-          {question}
-        </button>
-      </li>
-    ))}
-  </ul>
-
-  <form
-    data-chat-form
-    class="flex gap-2 rounded-full bg-ink-raise p-1.5 in-data-expanded:mx-auto in-data-expanded:w-full in-data-expanded:max-w-3xl"
-  >
-    <label for="ask-byte" class="sr-only">
-      {t('chat.inputLabel')}
-    </label>
-    <input
-      id="ask-byte"
-      name="question"
-      type="text"
-      autocomplete="off"
-      maxlength="500"
-      placeholder={t('chat.placeholder')}
-      class="min-h-11 min-w-0 flex-1 rounded-full bg-transparent px-4 text-ink-fg placeholder:text-ink-muted"
-    />
-    <button
-      type="submit"
-      aria-label={t('chat.send')}
-      class="grid size-11 flex-none cursor-pointer place-items-center rounded-full bg-lime text-on-lime transition-opacity hover:opacity-85"
-    >
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M12 19V5M6 11l6-6 6 6"></path>
-      </svg>
-    </button>
-  </form>
+  <ChatBody locale={locale} id="ask-byte" variant="tile" />
 </section>
 
 <script>
   import { insetClip } from '~/lib/clip';
+  import { mountByteChat } from '~/scripts/byte-chat';
 
   const chat = document.querySelector<HTMLElement>('[data-chat]');
   const bento = chat?.closest<HTMLElement>('[data-bento]');
   const toggle = chat?.querySelector<HTMLButtonElement>('[data-chat-toggle]');
-  const log = chat?.querySelector<HTMLElement>('[data-chat-log]');
-  const form = chat?.querySelector<HTMLFormElement>('[data-chat-form]');
-  const input = form?.querySelector<HTMLInputElement>('input');
+  const input = chat?.querySelector<HTMLInputElement>('[data-byte-form] input');
 
-  if (chat && bento && toggle && log && form && input) {
+  if (chat && bento && toggle && input) {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const ease = 'cubic-bezier(0.2, 0.8, 0.2, 1)';
     const isExpanded = () => chat.hasAttribute('data-expanded');
@@ -243,24 +204,7 @@ const { agent } = await getProfile(locale);
       }
     };
 
-    const addMessage = (text: string, from: 'user' | 'byte') => {
-      const bubble = document.createElement('p');
-      bubble.textContent = text;
-      bubble.className =
-        from === 'user'
-          ? 'max-w-[85%] self-end rounded-[18px_18px_6px_18px] bg-lime px-4 py-2.5 font-medium text-on-lime'
-          : 'max-w-[92%] rounded-[18px_18px_18px_6px] bg-ink-raise px-4 py-3';
-      log.append(bubble);
-      log.scrollTop = log.scrollHeight;
-    };
-
-    const ask = (question: string) => {
-      const text = question.trim();
-      if (!text) return;
-      void setExpanded(true);
-      addMessage(text, 'user');
-      window.setTimeout(() => addMessage(chat.dataset['reply'] ?? '', 'byte'), 500);
-    };
+    mountByteChat(chat, { onActivity: () => void setExpanded(true) });
 
     // Pointer clicks and typing expand the chat; keyboard focus alone does not (WCAG 3.2.1 On Focus).
     input.addEventListener('pointerdown', () => void setExpanded(true));
@@ -270,17 +214,6 @@ const { agent } = await getProfile(locale);
       const expand = !isExpanded();
       void setExpanded(expand);
       if (expand) input.focus();
-    });
-
-    for (const suggestion of chat.querySelectorAll<HTMLButtonElement>('[data-chat-suggestion]')) {
-      suggestion.addEventListener('click', () => ask(suggestion.dataset['chatSuggestion'] ?? ''));
-    }
-
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      ask(input.value);
-      input.value = '';
-      input.focus();
     });
 
     chat.addEventListener('keydown', (event) => {
