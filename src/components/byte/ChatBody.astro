@@ -29,8 +29,15 @@ const centered = tile && 'in-data-expanded:mx-auto in-data-expanded:w-full in-da
   aria-label={t('chat.log')}
   data-byte-log
   class:list={[
-    'flex flex-1 flex-col gap-2.5 overflow-y-auto overscroll-contain',
-    tile ? 'min-h-40 fit:min-h-0 in-data-expanded:min-h-0' : 'min-h-0 px-5 py-4',
+    // `relative` keeps the visually hidden "You:"/"Byte:" labels inside the scroll area; without it
+    // they are positioned against the page and stretch it.
+    'relative flex flex-1 flex-col gap-2.5 overflow-y-auto overscroll-contain',
+    // The log scrolls inside the tile instead of growing it: capped when stacked on small
+    // screens; on desktop, size containment keeps its content out of the grid's row sizing, so it
+    // only fills the space the tile already has.
+    tile
+      ? 'max-h-96 min-h-40 fit:max-h-none fit:[contain:size] fit:min-h-0 in-data-expanded:max-h-none in-data-expanded:min-h-0'
+      : 'min-h-0 px-5 py-4',
     centered,
   ]}
 >

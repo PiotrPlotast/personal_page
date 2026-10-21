@@ -159,6 +159,58 @@ test.describe('Byte on the home page', () => {
   });
 });
 
+test.describe('long conversations scroll inside the chat', () => {
+  const history = Array.from({ length: 14 }, (_, i) => [
+    { role: 'user', text: `Question ${i}?` },
+    { role: 'assistant', text: 'Piotr builds things with React and Expo. '.repeat(4) },
+  ]).flat();
+
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript((turns) => localStorage.setItem('byte:conversation', JSON.stringify(turns)), history);
+  });
+
+  const measure = (page: Page) =>
+    page.evaluate(() => {
+      const log = [...document.querySelectorAll<HTMLElement>('[data-byte-log]')].find((el) => el.offsetParent);
+      return {
+        pageScrolls: document.documentElement.scrollHeight > window.innerHeight,
+        logScrolls: log ? log.scrollHeight > log.clientHeight : false,
+      };
+    });
+
+  test('the home bento still fits one desktop screen, collapsed and expanded', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Desktop layout only');
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+    expect(await measure(page)).toEqual({ pageScrolls: false, logScrolls: true });
+    await page.getByRole('button', { name: 'Expand chat' }).click();
+    await expect(page.getByRole('heading', { name: "Hi, I'm Piotr." })).toBeHidden();
+    expect(await measure(page)).toEqual({ pageScrolls: false, logScrolls: true });
+  });
+
+  test('on phones the tile and the expanded chat keep a fixed size', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'Phone layout only');
+    await page.goto('/');
+    const tile = page.locator('[data-chat]');
+    expect((await tile.boundingBox())?.height).toBeLessThan(700);
+    expect((await measure(page)).logScrolls).toBe(true);
+    await page.getByRole('button', { name: 'Expand chat' }).click();
+    await expect(page.getByRole('heading', { name: "Hi, I'm Piotr." })).toBeHidden();
+    const viewport = page.viewportSize()?.height ?? 0;
+    expect((await tile.boundingBox())?.height).toBeLessThanOrEqual(viewport + 1);
+    expect((await measure(page)).logScrolls).toBe(true);
+  });
+
+  test('the floating chat scrolls inside the dialog', async ({ page }) => {
+    await page.goto('/projects/');
+    await page.getByRole('button', { name: 'Ask Byte' }).click();
+    const dialog = await page.getByRole('dialog').boundingBox();
+    // Full screen on phones: allow sub-pixel rounding.
+    expect(dialog?.height).toBeLessThanOrEqual((page.viewportSize()?.height ?? 0) + 1);
+    expect((await measure(page)).logScrolls).toBe(true);
+  });
+});
+
 test.describe('floating chat on other pages', () => {
   test('opens as a dialog, shares the conversation, and closes with Esc', async ({ page }) => {
     const bodies = await mockByte(page);
