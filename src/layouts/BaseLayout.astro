@@ -1,6 +1,7 @@
 ---
 import { Font } from 'astro:assets';
 import Header from '~/components/Header.astro';
+import FloatingChat from '~/components/byte/FloatingChat.astro';
 import Footer from '~/components/Footer.astro';
 import { localeFromPath, localeTags, localizePath, locales, type Locale } from '~/i18n/config';
 import { useTranslations } from '~/i18n/ui';
@@ -121,7 +122,13 @@ const jsonLd = article
       })();
     </script>
   </head>
-  <body class="min-h-dvh bg-bg text-base leading-relaxed text-fg fit:grid fit:grid-rows-[auto_1fr_auto]">
+  <body
+    class:list={[
+      'min-h-dvh bg-bg text-base leading-relaxed text-fg fit:grid fit:grid-rows-[auto_1fr_auto]',
+      // Room below the footer for the floating "Ask Byte" button.
+      !isHome && 'pb-16',
+    ]}
+  >
     <a
       href="#main"
       class="absolute top-2 -left-[9999px] z-10 rounded-xl bg-fg px-4 py-2.5 text-bg no-underline focus:left-4"
@@ -133,5 +140,6 @@ const jsonLd = article
       <slot />
     </main>
     <Footer locale={locale} name={profile.name} />
+    {!isHome && <FloatingChat locale={locale} />}
   </body>
 </html>

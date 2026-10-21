@@ -147,19 +147,6 @@ test.describe('chat expands over the bento', () => {
     await expect(hero(page)).toBeHidden();
   });
 
-  test('asking a question shows it with a placeholder reply', async ({ page }) => {
-    await page.goto('/');
-    await page.getByRole('button', { name: 'What has he built?' }).click();
-    const log = page.getByRole('log', { name: 'Conversation with Byte' });
-    await expect(log.getByText('What has he built?')).toBeVisible();
-    await expect(log.getByText(/still in training/).last()).toBeVisible();
-
-    await input(page).fill('Where does he study?');
-    await input(page).press('Enter');
-    await expect(log.getByText('Where does he study?')).toBeVisible();
-    await expect(input(page)).toHaveValue('');
-  });
-
   test('the expanded chat still fits one desktop screen', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Desktop layout only');
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -175,15 +162,16 @@ test.describe('chat expands over the bento', () => {
 
   for (const theme of ['light', 'dark'] as const) {
     test(`expanded chat has no axe violations in ${theme} mode`, async ({ page }) => {
+      await page.route('**/api/chat', (route) =>
+        route.fulfill({
+          headers: { 'content-type': 'text/event-stream' },
+          body: 'data: {"type":"text","text":"He builds **apps**."}\n\ndata: {"type":"done"}\n\n',
+        }),
+      );
       await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
       await page.goto('/');
       await page.getByRole('button', { name: "What's his stack?" }).click();
-      await expect(
-        page
-          .getByRole('log')
-          .getByText(/still in training/)
-          .last(),
-      ).toBeVisible();
+      await expect(page.getByRole('log').getByText('apps')).toBeVisible();
       const results = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'])
         .analyze();
@@ -261,10 +249,12 @@ test.describe('English and Polish', () => {
   });
 
   test('the chat works in Polish', async ({ page }) => {
+    await page.route('**/api/chat', (route) => route.fulfill({ status: 503, json: { error: 'unavailable' } }));
     await page.goto('/pl/');
     await page.getByRole('button', { name: 'Co zbudował?' }).click();
     const log = page.getByRole('log', { name: "Rozmowa z Byte'em" });
-    await expect(log.getByText(/Wciąż się uczę, więc/)).toBeVisible();
+    await expect(log.getByText('Co zbudował?')).toBeVisible();
+    await expect(log.getByText(/Jestem teraz offline/)).toBeVisible();
     await expect(page.getByRole('button', { name: 'Zamknij pełny czat' })).toBeVisible();
   });
 });

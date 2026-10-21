@@ -6,6 +6,8 @@ shortName: Piotr P.
 role: Frontend developer
 location: Polska
 timezone: CET
+# Jak Byte (agent AI) mówi o Tobie, po angielsku: "he/him", "she/her" albo "they/them".
+pronouns: he/him
 # TODO(content): uczelnia lub szkoła, np. "Politechnika Warszawska · 2. rok".
 # school:
 availability:
@@ -36,9 +38,8 @@ socials:
 agent:
   name: Byte
   tagline: Mój AI-pomocnik. Zna moje CV lepiej niż ja.
-  greeting: Psst. Jestem Byte, AI-pomocnik Piotra. Wciąż się uczę, ale śmiało, zapytaj o coś.
+  greeting: Psst. Jestem Byte, AI-pomocnik Piotra. Zapytaj mnie o projekty, umiejętności albo dostępność Piotra.
   suggestions:
     - Co zbudował?
     - Szuka stażu?
     - Jakiego stacku używa?
-  reply: Wciąż się uczę, więc na to jeszcze nie odpowiem. Prawdziwy ja pojawi się wkrótce! Do tego czasu zajrzyj do projektów albo na stronę kontaktu.
