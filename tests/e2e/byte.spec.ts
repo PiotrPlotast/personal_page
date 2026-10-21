@@ -188,6 +188,20 @@ test.describe('long conversations scroll inside the chat', () => {
     expect(await measure(page)).toEqual({ pageScrolls: false, logScrolls: true });
   });
 
+  test('closing the full chat keeps the latest message in view', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Desktop layout only');
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+    const hero = page.getByRole('heading', { name: "Hi, I'm Piotr." });
+    await page.getByRole('button', { name: 'Expand chat' }).click();
+    await expect(hero).toBeHidden();
+    await page.getByRole('button', { name: 'Close full chat' }).click();
+    await expect(hero).toBeVisible();
+    const distanceFromBottom = () =>
+      page.locator('[data-byte-log]').evaluate((log) => log.scrollHeight - log.scrollTop - log.clientHeight);
+    await expect.poll(distanceFromBottom).toBeLessThan(2);
+  });
+
   test('on phones the tile and the expanded chat keep a fixed size', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'Phone layout only');
     await page.goto('/');

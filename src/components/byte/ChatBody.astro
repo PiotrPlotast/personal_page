@@ -31,14 +31,17 @@ const centered = tile && 'in-data-expanded:mx-auto in-data-expanded:w-full in-da
   class:list={[
     // `relative` keeps the visually hidden "You:"/"Byte:" labels inside the scroll area; without it
     // they are positioned against the page and stretch it.
-    'relative flex flex-1 flex-col gap-2.5 overflow-y-auto overscroll-contain',
+    'byte-scroll relative flex flex-1 flex-col gap-2.5 overflow-y-auto overscroll-contain',
     // The log scrolls inside the tile instead of growing it: capped when stacked on small
     // screens; on desktop, size containment keeps its content out of the grid's row sizing, so it
     // only fills the space the tile already has.
     tile
       ? 'max-h-96 min-h-40 fit:max-h-none fit:[contain:size] fit:min-h-0 in-data-expanded:max-h-none in-data-expanded:min-h-0'
       : 'min-h-0 px-5 py-4',
-    centered,
+    // The scrollbar sits in the tile's padding, clear of the messages. When expanded the log spans
+    // the whole tile (scrollbar at its edge) and padding centres the messages over the input.
+    tile &&
+      '-mr-3 pr-3 in-data-expanded:pl-[max(0px,calc((100%_-_48rem)/2))] in-data-expanded:pr-[max(0.75rem,calc((100%_-_48rem)/2_+_0.75rem))]',
   ]}
 >
   <p class="mt-auto max-w-[92%] rounded-[18px_18px_18px_6px] bg-ink-raise px-4 py-3">{agent.greeting}</p>

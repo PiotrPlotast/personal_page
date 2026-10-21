@@ -198,6 +198,34 @@
   grid-row: 1 / -1;
 }
 
+/* A thin, quiet scrollbar for the chat log on its dark background: a rounded thumb, no track or
+   arrow buttons. Chrome, Edge and Safari use the ::-webkit-scrollbar rules (they'd be ignored if
+   scrollbar-color were set), Firefox gets the standard properties. */
+.byte-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+.byte-scroll::-webkit-scrollbar-track,
+.byte-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+.byte-scroll::-webkit-scrollbar-button {
+  display: none;
+}
+.byte-scroll::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  background: var(--c-ink-line) padding-box;
+}
+.byte-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: var(--c-ink-muted);
+}
+@supports (-moz-appearance: none) {
+  .byte-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--c-ink-line) transparent;
+  }
+}
+
 /* Byte's "typing" indicator. */
 .byte-dots {
   display: inline-flex;

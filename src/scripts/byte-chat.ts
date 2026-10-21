@@ -183,6 +183,14 @@ export function mountByteChat(root: HTMLElement, hooks: { onActivity?: () => voi
   const nearBottom = () => log.scrollHeight - log.scrollTop - log.clientHeight < 80;
   const scrollDown = () => (log.scrollTop = log.scrollHeight);
 
+  // Keep the latest message in view when the log changes size (expanding or collapsing the tile,
+  // turning a phone, the on-screen keyboard), unless the visitor has scrolled up to read.
+  let pinned = true;
+  log.addEventListener('scroll', () => (pinned = nearBottom()), { passive: true });
+  new ResizeObserver(() => {
+    if (pinned) scrollDown();
+  }).observe(log);
+
   const updateChrome = () => {
     const busy = controller !== null;
     sendButton.hidden = busy;
