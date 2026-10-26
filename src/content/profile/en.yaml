@@ -6,6 +6,8 @@ shortName: Piotr P.
 role: Frontend developer
 location: Poland
 timezone: CET
+# How Byte (the AI agent) refers to you.
+pronouns: he/him
 # TODO(content): school or university, e.g. "Warsaw University of Technology · 2nd year".
 # school:
 availability:
@@ -36,9 +38,8 @@ socials:
 agent:
   name: Byte
   tagline: My AI sidekick. Knows my CV better than I do.
-  greeting: Psst. I'm Byte, Piotr's AI sidekick. I'm still in training, but go on, ask me something.
+  greeting: Psst. I'm Byte, Piotr's AI sidekick. Ask me about Piotr's projects, skills or availability.
   suggestions:
     - What has he built?
     - Open to internships?
     - What's his stack?
-  reply: I'm still in training, so I can't answer that one yet. The real me arrives soon! Until then, Piotr's projects and contact page have you covered.

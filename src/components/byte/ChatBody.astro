@@ -1,0 +1,122 @@
+---
+/**
+ * The inside of a Byte chat: conversation log, suggestions, bot-check slot and the question form.
+ * Used by the home tile and the floating chat. The surrounding element carries `data-byte` and the
+ * interface strings, and src/scripts/byte-chat.ts brings it to life through the data-byte-* hooks.
+ */
+import type { Locale } from '~/i18n/config';
+import { useTranslations } from '~/i18n/ui';
+import { getProfile } from '~/lib/content';
+
+interface Props {
+  locale: Locale;
+  /** Prefix for element ids, unique per page. */
+  id: string;
+  variant: 'tile' | 'dialog';
+}
+
+const { locale, id, variant } = Astro.props;
+const t = useTranslations(locale);
+const { agent } = await getProfile(locale);
+const tile = variant === 'tile';
+const centered = tile && 'in-data-expanded:mx-auto in-data-expanded:w-full in-data-expanded:max-w-3xl';
+---
+
+<div
+  id={`${id}-log`}
+  role="log"
+  aria-live="off"
+  aria-label={t('chat.log')}
+  data-byte-log
+  class:list={[
+    // `relative` keeps the visually hidden "You:"/"Byte:" labels inside the scroll area; without it
+    // they are positioned against the page and stretch it.
+    'byte-scroll relative flex flex-1 flex-col gap-2.5 overflow-y-auto overscroll-contain',
+    // The log scrolls inside the tile instead of growing it: capped when stacked on small
+    // screens; on desktop, size containment keeps its content out of the grid's row sizing, so it
+    // only fills the space the tile already has.
+    tile
+      ? 'max-h-96 min-h-40 fit:max-h-none fit:[contain:size] fit:min-h-0 in-data-expanded:max-h-none in-data-expanded:min-h-0'
+      : 'min-h-0 px-5 py-4',
+    // The scrollbar sits in the tile's padding, clear of the messages. When expanded the log spans
+    // the whole tile (scrollbar at its edge) and padding centres the messages over the input.
+    tile &&
+      '-mr-3 pr-3 in-data-expanded:pl-[max(0px,calc((100%_-_48rem)/2))] in-data-expanded:pr-[max(0.75rem,calc((100%_-_48rem)/2_+_0.75rem))]',
+  ]}
+>
+  <p class="mt-auto max-w-[92%] rounded-[18px_18px_18px_6px] bg-ink-raise px-4 py-3">{agent.greeting}</p>
+</div>
+
+<!-- Finished answers are announced here once, instead of the log reading out every streamed word. -->
+<p role="status" class="sr-only" data-byte-live></p>
+
+<ul
+  aria-label={t('chat.suggestions')}
+  data-byte-suggestions
+  class:list={['flex flex-wrap gap-2', tile ? centered : 'px-5']}
+>
+  {agent.suggestions.map((question) => (
+    <li>
+      <button
+        type="button"
+        data-chat-suggestion={question}
+        class="min-h-11 cursor-pointer rounded-full border border-ink-line px-4 text-sm font-medium transition-colors hover:bg-ink-raise"
+      >
+        {question}
+      </button>
+    </li>
+  ))}
+</ul>
+
+<div data-byte-turnstile class:list={['empty:hidden', !tile && 'px-5']}></div>
+
+<div class:list={['flex flex-col gap-2', tile ? centered : 'px-5 pb-4']}>
+  <form data-byte-form class="flex gap-2 rounded-full bg-ink-raise p-1.5">
+    <label for={`${id}-input`} class="sr-only">
+      {t('chat.inputLabel')}
+    </label>
+    <input
+      id={`${id}-input`}
+      name="question"
+      type="text"
+      autocomplete="off"
+      maxlength="500"
+      placeholder={t('chat.placeholder')}
+      class="min-h-11 min-w-0 flex-1 rounded-full bg-transparent px-4 text-ink-fg placeholder:text-ink-muted"
+    />
+    <button
+      type="submit"
+      aria-label={t('chat.send')}
+      data-byte-send
+      class="grid size-11 flex-none cursor-pointer place-items-center rounded-full bg-lime text-on-lime transition-opacity hover:opacity-85"
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M12 19V5M6 11l6-6 6 6"></path>
+      </svg>
+    </button>
+    <button
+      type="button"
+      aria-label={t('chat.stop')}
+      data-byte-stop
+      hidden
+      class="grid size-11 flex-none cursor-pointer place-items-center rounded-full bg-ink-fg text-ink transition-opacity hover:opacity-85"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <rect x="4" y="4" width="16" height="16" rx="3"></rect>
+      </svg>
+    </button>
+  </form>
+  <p class:list={['text-center text-xs text-ink-muted', tile && 'hidden in-data-expanded:block']}>
+    {t('chat.disclaimer')}
+  </p>
+</div>

@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig, fontProviders } from 'astro/config';
+import { defineConfig, envField, fontProviders } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
@@ -23,6 +23,21 @@ export default defineConfig({
   output: 'static',
   adapter: vercel(),
   trailingSlash: 'ignore',
+  // Byte's settings. All optional: without them the site still builds and Byte reports it's offline.
+  // Server values are read at request time (Vercel → Settings → Environment Variables); see README.
+  env: {
+    schema: {
+      OPENROUTER_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      TURNSTILE_SECRET_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      PUBLIC_TURNSTILE_SITE_KEY: envField.string({ context: 'client', access: 'public', optional: true }),
+      GITHUB_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),
+      // Upstash Redis from the Vercel Marketplace sets one of these two pairs.
+      UPSTASH_REDIS_REST_URL: envField.string({ context: 'server', access: 'secret', optional: true }),
+      UPSTASH_REDIS_REST_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),
+      KV_REST_API_URL: envField.string({ context: 'server', access: 'secret', optional: true }),
+      KV_REST_API_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),
+    },
+  },
   // English lives at `/`, Polish under `/pl/`. Helpers for this are in src/i18n/config.ts.
   i18n: {
     locales: ['en', 'pl'],

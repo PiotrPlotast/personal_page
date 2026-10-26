@@ -5,7 +5,7 @@ import { z } from 'astro/zod';
 /*
  * All content lives in per-locale folders: `src/content/<collection>/<locale>/<slug>.<ext>`.
  * Entry ids are therefore `<locale>/<slug>`; see `src/lib/content.ts` for the lookup with
- * English fallback. The AI agent (phase 4) reads these same collections.
+ * English fallback. Byte, the AI agent, reads these same collections (src/lib/byte/knowledge-source.ts).
  */
 
 const url = z.url();
@@ -72,6 +72,8 @@ const profile = defineCollection({
     role: z.string(),
     location: z.string(),
     timezone: z.string(),
+    /** How Byte refers to you, e.g. "he/him", "she/her", "they/them". */
+    pronouns: z.string(),
     school: z.string().optional(),
     availability: z.object({ open: z.boolean(), label: z.string() }),
     tagline: z.string(),
@@ -85,8 +87,6 @@ const profile = defineCollection({
       tagline: z.string(),
       greeting: z.string(),
       suggestions: z.array(z.string()).min(1).max(4),
-      /** Placeholder answer until the real agent ships. */
-      reply: z.string(),
     }),
   }),
 });
