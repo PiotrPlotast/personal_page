@@ -5,16 +5,17 @@ targets are **Lighthouse 100 for accessibility, 95+ for everything else** and **
 
 ## Stack
 
-| Area      | Choice                                                                      |
-| --------- | --------------------------------------------------------------------------- |
-| Framework | [Astro 7](https://astro.build) (static output + Vercel adapter for the API) |
-| Styling   | Tailwind CSS 4, design tokens in `src/styles/global.css`                    |
-| Fonts     | Bricolage Grotesque + DM Sans, self-hosted through Astro's fonts API        |
-| Language  | TypeScript (strictest)                                                      |
-| Quality   | ESLint (+ jsx-a11y rules), Prettier, lefthook git hooks                     |
-| Tests     | Vitest (unit), Playwright + axe-core (e2e & accessibility), Lighthouse CI   |
-| AI agent  | Claude via OpenRouter (Anthropic SDK), Upstash Redis, Cloudflare Turnstile  |
-| Hosting   | Vercel                                                                      |
+| Area      | Choice                                                                       |
+| --------- | ---------------------------------------------------------------------------- |
+| Framework | [Astro 7](https://astro.build) (static output + Vercel adapter for the API)  |
+| Styling   | Tailwind CSS 4, design tokens in `src/styles/global.css`                     |
+| Fonts     | Bricolage Grotesque + DM Sans, self-hosted through Astro's fonts API         |
+| Language  | TypeScript (strictest)                                                       |
+| Quality   | ESLint (+ jsx-a11y rules), Prettier, lefthook git hooks                      |
+| Tests     | Vitest (unit), Playwright + axe-core (e2e & accessibility), Lighthouse CI    |
+| AI agent  | Claude via OpenRouter (Anthropic SDK), Upstash Redis, Cloudflare Turnstile   |
+| Analytics | Vercel Web Analytics (cookie-free) and Speed Insights (real-user Web Vitals) |
+| Hosting   | Vercel                                                                       |
 
 ## Getting started
 
@@ -129,5 +130,11 @@ Set these in Vercel (Project → Settings → Environment Variables), or in a lo
 
 ## Deployment
 
-The site deploys to Vercel. Set `SITE_URL` to the production URL (used for canonical links and the sitemap) once the
-custom domain is set up.
+Pushes to `main` deploy to production on Vercel (https://piotrplotast.vercel.app), and every pull request gets a preview
+URL. `vercel.json` makes Vercel run the full `pnpm build`, so the search index is built too.
+
+Analytics and Speed Insights are only included in Vercel builds (`VERCEL` is set there), because their scripts are
+served by Vercel itself. Turn them on once per project under **Analytics** and **Speed Insights** in the Vercel
+dashboard.
+
+Once a custom domain is set up, set `SITE_URL` to it (used for canonical links and the sitemap).
