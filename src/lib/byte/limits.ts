@@ -13,12 +13,14 @@ export async function takeRateLimit(
   visitor: string,
   now: Date,
   limits: readonly { window: number; max: number }[] = RATE_LIMITS,
+  /** Keeps separate counters per feature (the chat, the contact form). */
+  scope = 'byte',
 ): Promise<{ ok: true } | { ok: false; retryAfter: number }> {
   const seconds = Math.floor(now.getTime() / 1000);
   let retryAfter = 0;
   for (const { window, max } of limits) {
     const slot = Math.floor(seconds / window);
-    const count = await store.incrBy(`byte:rl:${window}:${slot}:${visitor}`, 1, window);
+    const count = await store.incrBy(`${scope}:rl:${window}:${slot}:${visitor}`, 1, window);
     if (count > max) retryAfter = Math.max(retryAfter, (slot + 1) * window - seconds);
   }
   return retryAfter > 0 ? { ok: false, retryAfter } : { ok: true };

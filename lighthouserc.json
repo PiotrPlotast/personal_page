@@ -9,7 +9,8 @@
         "http://localhost/projects/accountability-buddies/",
         "http://localhost/blog/",
         "http://localhost/blog/how-i-built-this-site/",
-        "http://localhost/about/"
+        "http://localhost/about/",
+        "http://localhost/contact/"
       ],
       "numberOfRuns": 3,
       "settings": {

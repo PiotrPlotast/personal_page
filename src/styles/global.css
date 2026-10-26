@@ -24,6 +24,8 @@
   --c-lime: #d9f99d;
   --c-on-lime: #1a2e05;
   --c-accent: #3f6212;
+  /* Form errors: 6.6:1 on tiles, 5.7:1 on the page background. */
+  --c-danger: #b42318;
   /* "Ink" tiles (chat, contact) stay dark in both themes. */
   --c-ink: #16171a;
   --c-ink-fg: #f4f4f5;
@@ -44,6 +46,7 @@
   --c-lime: #c7f27a;
   --c-on-lime: #1a2e05;
   --c-accent: #c7f27a;
+  --c-danger: #ff8a7a;
   --c-ink: #0b0b0d;
   --c-ink-fg: #f2f2f3;
   --c-ink-border: #2c2d33;
@@ -65,6 +68,7 @@
   --color-lime: var(--c-lime);
   --color-on-lime: var(--c-on-lime);
   --color-accent: var(--c-accent);
+  --color-danger: var(--c-danger);
   --color-ink: var(--c-ink);
   --color-ink-fg: var(--c-ink-fg);
   --color-ink-border: var(--c-ink-border);

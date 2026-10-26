@@ -109,6 +109,22 @@ Set these in Vercel (Project → Settings → Environment Variables), or in a lo
 | (or `KV_REST_API_URL`, `KV_REST_API_TOKEN`)          | integration in the Vercel Marketplace. Without it each server instance counts on its own  |
 | `GITHUB_TOKEN`                                       | Optional read-only token; raises GitHub's API limit from 60 to 5,000 requests an hour     |
 
+## Contact form
+
+`/contact/` sends the message to my inbox through [Resend](https://resend.com); replying to that email answers the
+sender directly. The browser checks the fields first and the server checks them again with the same rules
+(`src/lib/contact/form.ts`). `/api/contact` then runs a same-site check, a hidden honeypot field, a per-visitor rate
+limit (3 per 10 minutes, 10 a day) and the same Turnstile check as Byte before sending.
+
+| Variable             | What for                                                                                       |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| `RESEND_API_KEY`     | Resend API key (resend.com/api-keys). Without it, or without `CONTACT_TO_EMAIL`, the form says |
+| `CONTACT_TO_EMAIL`   | it isn't working and points to the other ways to get in touch. Where messages go               |
+| `CONTACT_FROM_EMAIL` | Sender, e.g. `Portfolio <contact@yourdomain.com>` once a domain is verified in Resend. Default |
+|                      | `onboarding@resend.dev` only delivers to the Resend account's own email                        |
+
+The Turnstile and Upstash variables above protect the form too.
+
 ## Accessibility
 
 - Every page is scanned with axe (WCAG 2.2 AA + best practices) in light and dark mode, on desktop and mobile.
@@ -125,7 +141,7 @@ Set these in Vercel (Project → Settings → Environment Variables), or in a lo
 - [x] **Phase 2:** content collections (projects, posts, experience), English + Polish
 - [x] **Phase 3:** projects with case studies, blog (MDX, tags, RSS, search), About + CV, SEO
 - [x] **Phase 4:** Byte, the AI agent (Claude via OpenRouter, tool use, streaming, rate limiting, Turnstile)
-- [ ] **Phase 5:** contact form (Resend + Turnstile)
+- [x] **Phase 5:** contact form (Resend + Turnstile)
 - [ ] **Phase 6:** launch on Vercel with a custom domain and analytics
 
 ## Deployment

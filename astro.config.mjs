@@ -23,7 +23,8 @@ export default defineConfig({
   output: 'static',
   adapter: vercel(),
   trailingSlash: 'ignore',
-  // Byte's settings. All optional: without them the site still builds and Byte reports it's offline.
+  // Byte's and the contact form's settings. All optional: without them the site still builds, and
+  // Byte and the form say they're unavailable.
   // Server values are read at request time (Vercel → Settings → Environment Variables); see README.
   env: {
     schema: {
@@ -31,6 +32,10 @@ export default defineConfig({
       TURNSTILE_SECRET_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
       PUBLIC_TURNSTILE_SITE_KEY: envField.string({ context: 'client', access: 'public', optional: true }),
       GITHUB_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),
+      // The contact form: Resend sends each message to CONTACT_TO_EMAIL.
+      RESEND_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      CONTACT_TO_EMAIL: envField.string({ context: 'server', access: 'secret', optional: true }),
+      CONTACT_FROM_EMAIL: envField.string({ context: 'server', access: 'secret', optional: true }),
       // Upstash Redis from the Vercel Marketplace sets one of these two pairs.
       UPSTASH_REDIS_REST_URL: envField.string({ context: 'server', access: 'secret', optional: true }),
       UPSTASH_REDIS_REST_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),

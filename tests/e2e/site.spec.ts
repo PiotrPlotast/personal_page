@@ -17,6 +17,7 @@ const pages = [
   '/pl/blog',
   '/pl/blog/how-i-built-this-site',
   '/pl/about',
+  '/pl/contact',
 ];
 
 test.describe('accessibility (axe, WCAG 2.2 AA)', () => {
