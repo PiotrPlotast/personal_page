@@ -13,7 +13,7 @@ import type { Store } from './store';
 import { createToolRunner, toolDefinitions } from './tools';
 
 export interface ChatDeps {
-  /** Null when no Anthropic API key is configured: Byte then politely says it's offline. */
+  /** Null when no OpenRouter API key is configured: Byte then politely says it's offline. */
   createStream: CreateStream | null;
   store: Store;
   github: GitHub;
@@ -53,6 +53,7 @@ function sameSite(request: Request): boolean {
 const outcomeError: Record<Exclude<AgentOutcome, 'done' | 'aborted'>, ByteErrorCode> = {
   refusal: 'refusal',
   busy: 'busy',
+  budget: 'budget',
   error: 'unavailable',
 };
 

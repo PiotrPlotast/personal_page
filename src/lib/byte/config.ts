@@ -3,7 +3,17 @@
  * may ask. Everything else in src/lib/byte reads from here.
  */
 
-export const MODEL = 'claude-haiku-5-5';
+/**
+ * Requests go through OpenRouter, which speaks Anthropic's Messages API, so the official Anthropic
+ * SDK is used with OpenRouter's address. Model ids are OpenRouter's (see openrouter.ai/models).
+ */
+export const OPENROUTER = {
+  baseURL: 'https://openrouter.ai/api',
+  /** Shown on OpenRouter's dashboard next to each request. ASCII only: it's sent as an HTTP header. */
+  appName: 'Byte - Piotr Plotast',
+};
+
+export const MODEL = 'anthropic/claude-haiku-5.5';
 
 /** Thinking depth. "low" keeps answers fast and cheap; a portfolio Q&A doesn't need more. */
 export const EFFORT = 'low';
@@ -14,7 +24,11 @@ export const MAX_TOKENS = 2048;
 /** Model calls per question (each tool lookup costs one more). Stops a confused loop early. */
 export const MAX_ROUNDS = 5;
 
-/** USD per million tokens, for prompts up to 100K tokens (ours are ~10K). */
+/**
+ * USD per million tokens for MODEL on OpenRouter, for prompts up to 100K tokens (ours are ~10K).
+ * Streamed answers report tokens, not dollars, so the budget below is counted with these.
+ * Update them together with MODEL.
+ */
 export const PRICES = {
   input: 0.1,
   output: 0.5,
@@ -25,7 +39,7 @@ export const PRICES = {
   longContextMultiplier: 5,
 };
 
-/** Spending caps in USD. The Anthropic Console limit is the hard stop; these keep Byte polite about it. */
+/** Spending caps in USD. The credit limit on the OpenRouter key is the hard stop; these keep Byte polite about it. */
 export const BUDGET = {
   monthly: 5,
   /** A single viral day can use at most a tenth of the month. */

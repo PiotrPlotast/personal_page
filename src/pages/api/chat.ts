@@ -1,14 +1,14 @@
-import Anthropic from '@anthropic-ai/sdk';
 import type { APIRoute } from 'astro';
 import {
-  ANTHROPIC_API_KEY,
   GITHUB_TOKEN,
   KV_REST_API_TOKEN,
   KV_REST_API_URL,
+  OPENROUTER_API_KEY,
   TURNSTILE_SECRET_KEY,
   UPSTASH_REDIS_REST_TOKEN,
   UPSTASH_REDIS_REST_URL,
 } from 'astro:env/server';
+import { createOpenRouterStream } from '~/lib/byte/client';
 import { createGitHub } from '~/lib/byte/github';
 import { handleChat, type ChatDeps } from '~/lib/byte/handler';
 import { loadKnowledge } from '~/lib/byte/knowledge-source';
@@ -23,12 +23,13 @@ const store = createStore({
   url: UPSTASH_REDIS_REST_URL ?? KV_REST_API_URL,
   token: UPSTASH_REDIS_REST_TOKEN ?? KV_REST_API_TOKEN,
 });
-const client = ANTHROPIC_API_KEY ? new Anthropic({ apiKey: ANTHROPIC_API_KEY }) : null;
 
 const turnstileSecret = TURNSTILE_SECRET_KEY;
 
 const deps: ChatDeps = {
-  createStream: client ? (params, { signal }) => client.messages.stream(params, { signal }) : null,
+  createStream: OPENROUTER_API_KEY
+    ? createOpenRouterStream({ apiKey: OPENROUTER_API_KEY, referer: import.meta.env.SITE })
+    : null,
   store,
   github: createGitHub({ store, token: GITHUB_TOKEN }),
   loadKnowledge,

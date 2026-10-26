@@ -137,6 +137,17 @@ describe('runAgent', () => {
     expect(usage).toHaveLength(1);
   });
 
+  it('reports an empty OpenRouter balance as the budget running out', async () => {
+    const noCredit = new Anthropic.APIError(
+      402,
+      { error: { message: 'Insufficient credits' } },
+      'Payment Required',
+      new Headers(),
+    );
+    const { run } = setup([{ error: noCredit }]);
+    expect(await run()).toBe('budget');
+  });
+
   it('re-issues a round once when a tool input is unreadable and nothing was shown yet', async () => {
     const { run, requests, events } = setup([{ error: new SyntaxError('Unexpected end of JSON') }, { text: ['OK'] }]);
     expect(await run()).toBe('done');

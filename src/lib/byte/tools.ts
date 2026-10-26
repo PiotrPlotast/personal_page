@@ -25,8 +25,6 @@ const definition = (
   name,
   description,
   input_schema: { type: 'object', properties, required },
-  // Inputs stream as they're generated; we validate them ourselves before running anything.
-  eager_input_streaming: true,
 });
 
 /** Tool definitions in a fixed order, so the cached prompt prefix never changes between requests. */

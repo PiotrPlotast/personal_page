@@ -27,7 +27,7 @@ export default defineConfig({
   // Server values are read at request time (Vercel → Settings → Environment Variables); see README.
   env: {
     schema: {
-      ANTHROPIC_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      OPENROUTER_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
       TURNSTILE_SECRET_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
       PUBLIC_TURNSTILE_SITE_KEY: envField.string({ context: 'client', access: 'public', optional: true }),
       GITHUB_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),

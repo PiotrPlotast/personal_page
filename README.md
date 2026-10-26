@@ -13,7 +13,7 @@ targets are **Lighthouse 100 for accessibility, 95+ for everything else** and **
 | Language  | TypeScript (strictest)                                                      |
 | Quality   | ESLint (+ jsx-a11y rules), Prettier, lefthook git hooks                     |
 | Tests     | Vitest (unit), Playwright + axe-core (e2e & accessibility), Lighthouse CI   |
-| AI agent  | Claude API (Anthropic SDK), Upstash Redis, Cloudflare Turnstile             |
+| AI agent  | Claude via OpenRouter (Anthropic SDK), Upstash Redis, Cloudflare Turnstile  |
 | Hosting   | Vercel                                                                      |
 
 ## Getting started
@@ -86,8 +86,9 @@ Byte answers visitors' questions about me, in the home page tile and in the "Ask
 - **What it knows:** my profile, project list, posts and experience from `src/content/` go into its instructions. When
   a question needs more, it looks things up with tools: a project's case study, a post's full text, or my public
   GitHub (repos, READMEs, recent commits). The chat shows each lookup.
-- **How it answers:** `/api/chat` (a Vercel function) streams the reply from the Claude API as it's written. The
-  conversation is kept in the visitor's browser (`localStorage`) and sent along with each question.
+- **How it answers:** `/api/chat` (a Vercel function) streams the reply from Claude, through
+  [OpenRouter](https://openrouter.ai), as it's written. The conversation is kept in the visitor's browser
+  (`localStorage`) and sent along with each question.
 - **Protection:** in order, every question goes through a same-site check, a per-visitor rate limit (10 per 10 minutes,
   60 a day), Cloudflare Turnstile (an invisible bot check, once per visit), and the spending budget ($5 a month, at
   most $0.50 a day). When the budget is used up Byte says it's out of coffee and points to the contact page.
@@ -99,13 +100,13 @@ Byte answers visitors' questions about me, in the home page tile and in the "Ask
 Set these in Vercel (Project → Settings → Environment Variables), or in a local `.env` file for `pnpm dev` (see
 `.env.example`). All are optional: without an API key Byte simply says it's offline.
 
-| Variable                                             | What for                                                                                      |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_API_KEY`                                  | Claude API key from console.anthropic.com. Also set a monthly spend limit there: the hard cap |
-| `PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`  | Cloudflare Turnstile widget keys. Without them the bot check is skipped                       |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Shared store for rate limits, the budget and the GitHub cache. Added by the Upstash           |
-| (or `KV_REST_API_URL`, `KV_REST_API_TOKEN`)          | integration in the Vercel Marketplace. Without it each server instance counts on its own      |
-| `GITHUB_TOKEN`                                       | Optional read-only token; raises GitHub's API limit from 60 to 5,000 requests an hour         |
+| Variable                                             | What for                                                                                  |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `OPENROUTER_API_KEY`                                 | OpenRouter API key (openrouter.ai/keys). Give the key a credit limit: that's the hard cap |
+| `PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`  | Cloudflare Turnstile widget keys. Without them the bot check is skipped                   |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Shared store for rate limits, the budget and the GitHub cache. Added by the Upstash       |
+| (or `KV_REST_API_URL`, `KV_REST_API_TOKEN`)          | integration in the Vercel Marketplace. Without it each server instance counts on its own  |
+| `GITHUB_TOKEN`                                       | Optional read-only token; raises GitHub's API limit from 60 to 5,000 requests an hour     |
 
 ## Accessibility
 
@@ -122,7 +123,7 @@ Set these in Vercel (Project → Settings → Environment Variables), or in a lo
 - [x] **Phase 1:** project setup, design tokens, home page, CI
 - [x] **Phase 2:** content collections (projects, posts, experience), English + Polish
 - [x] **Phase 3:** projects with case studies, blog (MDX, tags, RSS, search), About + CV, SEO
-- [x] **Phase 4:** Byte, the AI agent (Claude API, tool use, streaming, rate limiting, Turnstile)
+- [x] **Phase 4:** Byte, the AI agent (Claude via OpenRouter, tool use, streaming, rate limiting, Turnstile)
 - [ ] **Phase 5:** contact form (Resend + Turnstile)
 - [ ] **Phase 6:** launch on Vercel with a custom domain and analytics
 

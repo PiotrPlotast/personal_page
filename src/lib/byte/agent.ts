@@ -12,7 +12,7 @@ export interface StreamLike extends AsyncIterable<Anthropic.MessageStreamEvent> 
 
 export type CreateStream = (params: Anthropic.MessageStreamParams, options: { signal: AbortSignal }) => StreamLike;
 
-export type AgentOutcome = 'done' | 'refusal' | 'aborted' | 'busy' | 'error';
+export type AgentOutcome = 'done' | 'refusal' | 'aborted' | 'busy' | 'budget' | 'error';
 
 export interface AgentOptions {
   createStream: CreateStream;
@@ -68,6 +68,11 @@ export async function runAgent(options: AgentOptions): Promise<AgentOutcome> {
       ) {
         log('Byte: Claude is busy or unreachable', error);
         return 'busy';
+      }
+      // OpenRouter answers 402 when the key's credit runs out: the hard spending cap.
+      if (error instanceof Anthropic.APIError && error.status === 402) {
+        log('Byte: out of OpenRouter credit', error);
+        return 'budget';
       }
       if (error instanceof Anthropic.APIError) {
         log('Byte: Claude API error', error);
