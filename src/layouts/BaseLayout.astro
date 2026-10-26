@@ -1,4 +1,6 @@
 ---
+import Analytics from '@vercel/analytics/astro';
+import SpeedInsights from '@vercel/speed-insights/astro';
 import { Font } from 'astro:assets';
 import Header from '~/components/Header.astro';
 import FloatingChat from '~/components/byte/FloatingChat.astro';
@@ -26,6 +28,10 @@ const locale = Astro.props.locale ?? localeFromPath(Astro.url.pathname);
 const t = useTranslations(locale);
 const profile = await getProfile(locale);
 const description = Astro.props.description ?? t('site.description');
+// Vercel Web Analytics (cookie-free page views) and Speed Insights (real-visitor Core Web Vitals).
+// Their scripts are served by Vercel at /_vercel/…, so they're only included in Vercel builds;
+// locally and in CI the requests would 404.
+const onVercel = Boolean(process.env['VERCEL']);
 const fullTitle = title ? `${title} · ${profile.name}` : `${profile.name} · ${profile.role}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const altLinks = alternates
@@ -141,5 +147,12 @@ const jsonLd = article
     </main>
     <Footer locale={locale} name={profile.name} />
     {!isHome && <FloatingChat locale={locale} />}
+    {onVercel && (
+      // Hidden wrapper: the two custom elements only start the scripts and must not become grid rows.
+      <div hidden>
+        <Analytics />
+        <SpeedInsights />
+      </div>
+    )}
   </body>
 </html>
