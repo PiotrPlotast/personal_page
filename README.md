@@ -142,15 +142,17 @@ The Turnstile and Upstash variables above protect the form too.
 - [x] **Phase 3:** projects with case studies, blog (MDX, tags, RSS, search), About + CV, SEO
 - [x] **Phase 4:** Byte, the AI agent (Claude via OpenRouter, tool use, streaming, rate limiting, Turnstile)
 - [x] **Phase 5:** contact form (Resend + Turnstile)
-- [ ] **Phase 6:** launch on Vercel with a custom domain and analytics
+- [x] **Phase 6:** launch on Vercel with a custom domain (piotrplotast.dev) and analytics
 
 ## Deployment
 
-Pushes to `main` deploy to production on Vercel (https://piotrplotast.vercel.app), and every pull request gets a preview
+Pushes to `main` deploy to production on Vercel at https://piotrplotast.dev, and every pull request gets a preview
 URL. `vercel.json` makes Vercel run the full `pnpm build`, so the search index is built too.
 
 Analytics and Speed Insights are only included in Vercel builds (`VERCEL` is set there), because their scripts are
 served by Vercel itself. Turn them on once per project under **Analytics** and **Speed Insights** in the Vercel
 dashboard.
 
-Once a custom domain is set up, set `SITE_URL` to it (used for canonical links and the sitemap).
+The domain in `astro.config.mjs` (`site`) is used for canonical links, the sitemap, `robots.txt`, RSS and Open Graph
+images. `SITE_URL` overrides it. In Vercel → Settings → Domains, `piotrplotast.dev` should be the primary domain, with
+`www.piotrplotast.dev` redirecting to it, so canonical links point at the address visitors actually land on.

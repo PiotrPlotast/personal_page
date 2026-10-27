@@ -32,7 +32,7 @@ const deps: ContactDeps = {
   send: apiKey && to ? (email) => sendWithResend(apiKey, { ...email, from, to }) : null,
   store,
   verifyTurnstile: turnstileSecret ? (token, ip) => verifyTurnstile(token, turnstileSecret, ip) : null,
-  siteName: new URL(import.meta.env.SITE ?? 'https://piotrplotast.vercel.app').host,
+  siteName: new URL(import.meta.env.SITE ?? 'https://piotrplotast.dev').host,
 };
 
 export const POST: APIRoute = (context) => {

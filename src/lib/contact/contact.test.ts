@@ -48,7 +48,7 @@ describe('handleContact', () => {
       send: async (email) => void sent.push(email),
       store: new MemoryStore(() => NOW.getTime()),
       verifyTurnstile: null,
-      siteName: 'piotrplotast.vercel.app',
+      siteName: 'piotrplotast.dev',
       now: () => NOW,
       log: () => undefined,
       ...overrides,
@@ -57,9 +57,9 @@ describe('handleContact', () => {
   }
 
   const post = (body: unknown, headers: Record<string, string> = {}) =>
-    new Request('https://piotrplotast.vercel.app/api/contact', {
+    new Request('https://piotrplotast.dev/api/contact', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', origin: 'https://piotrplotast.vercel.app', ...headers },
+      headers: { 'content-type': 'application/json', origin: 'https://piotrplotast.dev', ...headers },
       body: typeof body === 'string' ? body : JSON.stringify(body),
     });
 
@@ -71,7 +71,7 @@ describe('handleContact', () => {
     expect(sent).toHaveLength(1);
     expect(sent[0]).toMatchObject({
       replyTo: 'ada@example.com',
-      subject: 'New message from Ada Lovelace via piotrplotast.vercel.app',
+      subject: 'New message from Ada Lovelace via piotrplotast.dev',
       idempotencyKey: expect.stringMatching(/^contact-[0-9a-f]{32}$/),
     });
     expect(sent[0]?.text).toContain('Language: Polski');

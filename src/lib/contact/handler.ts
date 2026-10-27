@@ -10,7 +10,7 @@ export interface ContactDeps {
   store: Store;
   /** Null when Turnstile isn't configured (local development). */
   verifyTurnstile: ((token: string, ip: string | undefined) => Promise<boolean>) | null;
-  /** Shown in the email, e.g. "piotrplotast.vercel.app". */
+  /** Shown in the email, e.g. "piotrplotast.dev". */
   siteName: string;
   now?: () => Date;
   log?: (message: string, error?: unknown) => void;

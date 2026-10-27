@@ -5,8 +5,8 @@ import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 import tailwindcss from '@tailwindcss/vite';
 
-// TODO: switch to the custom domain once it's bought (see README → Deployment).
-const site = process.env.SITE_URL ?? 'https://piotrplotast.vercel.app';
+// The production domain. SITE_URL overrides it (e.g. to test canonical links on another host).
+const site = process.env.SITE_URL ?? 'https://piotrplotast.dev';
 
 // Latin + Latin Extended covers English and Polish (ą, ć, ę, ł, ń, ó, ś, ź, ż).
 const LATIN =
