@@ -5,6 +5,7 @@ import { EFFORT, INPUT_LIMITS, MAX_TOKENS, MODEL, SESSION_SECONDS } from './conf
 import { costMicros } from './cost';
 import type { GitHub } from './github';
 import { systemPrompt, type Knowledge } from './knowledge';
+import { sameSite } from '~/lib/same-site';
 import { recordSpend, takeRateLimit, visitorId, withinBudget } from './limits';
 import { encodeEvent, type ByteErrorCode, type ByteEvent, type ErrorBody } from './protocol';
 import { parseChatRequest } from './request';
@@ -31,24 +32,6 @@ const fail = (status: number, error: ByteErrorCode, extra: Omit<ErrorBody, 'erro
     status,
     headers: { 'Cache-Control': 'no-store', ...(extra.retryAfter ? { 'Retry-After': String(extra.retryAfter) } : {}) },
   });
-
-/**
- * Browsers always send Origin on POST; refusing other sites keeps them from using Byte from their
- * pages. Behind a proxy (Vercel) the public host may only be in Host / X-Forwarded-Host, so any of
- * them counts. (A cross-site page can't set those headers without a CORS preflight, which fails.)
- */
-function sameSite(request: Request): boolean {
-  const origin = request.headers.get('origin');
-  if (!origin) return true;
-  let host: string;
-  try {
-    host = new URL(origin).host;
-  } catch {
-    return false;
-  }
-  const hosts = [new URL(request.url).host, request.headers.get('host'), request.headers.get('x-forwarded-host')];
-  return hosts.includes(host);
-}
 
 const outcomeError: Record<Exclude<AgentOutcome, 'done' | 'aborted'>, ByteErrorCode> = {
   refusal: 'refusal',
