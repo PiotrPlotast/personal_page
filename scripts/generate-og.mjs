@@ -38,7 +38,7 @@ const html = `<!doctype html>
 </style></head><body>
   <div class="tile hero">
     <span class="badge">Open to internships</span>
-    <div><h1>Piotr Płotast</h1><p class="role">Frontend developer · Poland</p></div>
+    <div><h1>Piotr Płotast</h1><p class="role">Computer Science student · Poland</p></div>
   </div>
   <div class="tile ink"><span class="label">Ask Byte</span><p class="bubble">Ask me anything about Piotr.</p></div>
   <div class="tile lime"><p>Projects, writing &amp; an AI sidekick</p></div>
