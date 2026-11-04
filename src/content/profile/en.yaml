@@ -3,7 +3,7 @@ name: Piotr Płotast
 firstName: Piotr
 nickname: Pietrell
 shortName: Piotr P.
-role: Frontend developer
+role: Computer Science student
 location: Poland
 timezone: CET
 # How Byte (the AI agent) refers to you.
@@ -14,8 +14,8 @@ availability:
   open: true
   # TODO(content): add when, e.g. "Open to internships from Summer 2027".
   label: Open to internships
-tagline: A frontend developer and student from Poland. I like building beautiful, functional apps, and writing about what I learn along the way.
-about: My priority is to keep learning and getting better. Right now I'm going deeper into React, and exploring design, UX and backend topics. Always open to new projects and collaborations with other developers.
+tagline: A computer science student from Poland, passionate about technology and IT. I like building things that work, and writing about what I learn along the way.
+about: My priority is to keep learning and getting better. I'm curious about how technology works at every level, from the apps people use to the backends, systems and infrastructure behind them. Always open to new projects and collaborations.
 skills:
   - TypeScript
   - React
@@ -30,7 +30,7 @@ skills:
   - Git
 now:
   - Building Accountability Buddies with Expo and Supabase
-  - Going deeper into React, design and UX
+  - Exploring backend, systems and the wider world of IT
 # TODO(content): email and LinkedIn / Discord links.
 socials:
   - label: GitHub

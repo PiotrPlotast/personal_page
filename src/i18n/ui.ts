@@ -6,7 +6,7 @@ import { defaultLocale, type Locale } from './config';
  */
 const en = {
   'site.description':
-    'Piotr Płotast, frontend developer and student from Poland. Projects, writing and an AI agent that answers questions about me.',
+    'Piotr Płotast, computer science student from Poland, passionate about technology and IT. Projects, writing and an AI agent that answers questions about me.',
   'a11y.skip': 'Skip to content',
   'nav.label': 'Main',
   'nav.projects': 'Projects',
@@ -119,7 +119,7 @@ const en = {
   'projects.screenshots': 'Screenshots',
   'projects.writeupSoon': 'The full write-up for this project is coming soon. Until then, the code is on GitHub.',
 
-  'blog.intro': 'Notes on what I build and learn: frontend, design, accessibility and the occasional rabbit hole.',
+  'blog.intro': 'Notes on what I build and learn: code, tech, IT and the occasional rabbit hole.',
   'blog.empty': 'No posts yet. The first one is on its way.',
   'blog.minRead': '{n} min read',
   'blog.tags': 'Tags',
@@ -160,7 +160,7 @@ export type UiKey = keyof typeof en;
 
 const pl = {
   'site.description':
-    'Piotr Płotast, frontend developer i student z Polski. Projekty, wpisy i agent AI, który odpowiada na pytania o mnie.',
+    'Piotr Płotast, student informatyki z Polski, pasjonat technologii i IT. Projekty, wpisy i agent AI, który odpowiada na pytania o mnie.',
   'a11y.skip': 'Przejdź do treści',
   'nav.label': 'Główna',
   'nav.projects': 'Projekty',
@@ -272,8 +272,7 @@ const pl = {
   'projects.screenshots': 'Zrzuty ekranu',
   'projects.writeupSoon': 'Pełny opis tego projektu pojawi się wkrótce. Do tego czasu kod jest na GitHubie.',
 
-  'blog.intro':
-    'Notatki o tym, co buduję i czego się uczę: frontend, design, dostępność i od czasu do czasu jakaś dygresja.',
+  'blog.intro': 'Notatki o tym, co buduję i czego się uczę: kod, technologia, IT i od czasu do czasu jakaś dygresja.',
   'blog.empty': 'Nie ma jeszcze wpisów. Pierwszy jest w drodze.',
   'blog.minRead': '{n} min czytania',
   'blog.tags': 'Tagi',

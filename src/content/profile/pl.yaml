@@ -3,7 +3,7 @@ name: Piotr Płotast
 firstName: Piotr
 nickname: Pietrell
 shortName: Piotr P.
-role: Frontend developer
+role: Student informatyki
 location: Polska
 timezone: CET
 # Jak Byte (agent AI) mówi o Tobie, po angielsku: "he/him", "she/her" albo "they/them".
@@ -14,8 +14,8 @@ availability:
   open: true
   # TODO(content): od kiedy, np. "Szukam stażu od lata 2027".
   label: Szukam stażu
-tagline: Frontend developer i student z Polski. Lubię tworzyć piękne, funkcjonalne aplikacje i pisać o tym, czego się po drodze uczę.
-about: Moim priorytetem jest ciągła nauka i rozwój. Teraz zgłębiam Reacta i poznaję design, UX oraz tematy backendowe. Zawsze chętnie biorę udział w nowych projektach i współpracuję z innymi programistami.
+tagline: Student informatyki z Polski, pasjonat technologii i IT. Lubię budować rzeczy, które działają, i pisać o tym, czego się po drodze uczę.
+about: Moim priorytetem jest ciągła nauka i rozwój. Ciekawi mnie, jak technologia działa na każdym poziomie – od aplikacji, z których korzystają ludzie, po backend, systemy i infrastrukturę za nimi. Zawsze chętnie biorę udział w nowych projektach i współpracach.
 skills:
   - TypeScript
   - React
@@ -30,7 +30,7 @@ skills:
   - Git
 now:
   - Tworzę Accountability Buddies w Expo i Supabase
-  - Zgłębiam Reacta, design i UX
+  - Poznaję backend, systemy i szeroko pojęte IT
 # TODO(content): e-mail oraz linki do LinkedIna / Discorda.
 socials:
   - label: GitHub
